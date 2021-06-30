@@ -1,3 +1,7 @@
+// Copyright (c) 2019 kenkoooo
+// Code released under the MIT license
+// https://opensource.org/licenses/mit-license.php
+
 use sql_client::models::Theme;
 use sql_client::theme_client::ThemeClient;
 use chrono::TimeZone;

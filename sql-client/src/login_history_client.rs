@@ -1,3 +1,7 @@
+// Copyright (c) 2019 kenkoooo
+// Code released under the MIT license
+// https://opensource.org/licenses/mit-license.php
+
 use crate::{PgPool, Row, PgRow, Result};
 use crate::models::LoginHistory;
 use async_trait::async_trait;

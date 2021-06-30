@@ -1,3 +1,7 @@
+// Copyright (c) 2019 kenkoooo
+// Code released under the MIT license
+// https://opensource.org/licenses/mit-license.php
+
 use sql_client::models::User;
 use sql_client::user_client::UserClient;
 

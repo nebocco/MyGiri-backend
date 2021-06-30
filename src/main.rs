@@ -1,3 +1,7 @@
+// Copyright (c) 2018 Ba Hai Phan
+// Code released under the MIT license
+// https://opensource.org/licenses/mit-license.php
+
 use std::env;
 use actix_backend::server::run_server;
 

@@ -1,4 +1,7 @@
-//utils.rs
+// Copyright (c) 2018 Ba Hai Phan
+// Code released under the MIT license
+// https://opensource.org/licenses/mit-license.php
+
 use once_cell::sync::Lazy;
 use argon2::{self, Config};
 use crate::models::login::{UserToken, ENCODE_KEY};

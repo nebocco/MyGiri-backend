@@ -1,3 +1,7 @@
+// Copyright (c) 2018 Ba Hai Phan
+// Code released under the MIT license
+// https://opensource.org/licenses/mit-license.php
+
 use crate::{config::db::Pool, constants, models::response::ResponseBody, utils};
 use actix_web::{
     Error, HttpResponse,

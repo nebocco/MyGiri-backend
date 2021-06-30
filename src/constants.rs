@@ -1,3 +1,7 @@
+// Copyright (c) 2018 Ba Hai Phan
+// Code released under the MIT license
+// https://opensource.org/licenses/mit-license.php
+
 // Messages
 pub const MESSAGE_OK: &str = "ok";
 pub const MESSAGE_CAN_NOT_FETCH_DATA: &str = "Can not fetch data";

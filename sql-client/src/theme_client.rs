@@ -1,3 +1,7 @@
+// Copyright (c) 2019 kenkoooo
+// Code released under the MIT license
+// https://opensource.org/licenses/mit-license.php
+
 use crate::{PgPool, PgRow, Row, Result};
 use crate::models::Theme;
 use async_trait::async_trait;
