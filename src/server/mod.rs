@@ -1,0 +1,31 @@
+use actix_web::{http, App, HttpServer};
+use actix_web::dev::Service;
+use actix_cors::Cors;
+
+use sql_client::PgPool;
+
+use crate::config;
+
+pub(crate) mod user_api;
+
+pub async fn run_server(pg_pool: PgPool, port: u16) -> std::io::Result<()> {
+    HttpServer::new(move || {
+        App::new()
+            .wrap(Cors::default() // allowed_origin return access-control-allow-origin: * by default
+            .allowed_origin("http://127.0.0.1:8080")
+            .allowed_origin("http://localhost:8080")
+                .send_wildcard()
+                .allowed_methods(vec!["GET", "POST", "PUT", "DELETE"])
+                .allowed_headers(vec![http::header::AUTHORIZATION, http::header::ACCEPT])
+                .allowed_header(http::header::CONTENT_TYPE)
+                .max_age(3600))
+            .data(pg_pool.clone())
+            .wrap(actix_web::middleware::Logger::default())
+            .wrap(crate::middleware::Authentication)
+            .wrap_fn(|req, srv| { srv.call(req) })
+            .configure(config::app::config_services)
+    })
+    .bind(format!("localhost:{}", port))?
+    .run()
+    .await
+}
