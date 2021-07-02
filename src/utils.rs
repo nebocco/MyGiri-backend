@@ -6,7 +6,7 @@ use once_cell::sync::Lazy;
 use argon2::{self, Config};
 use crate::models::login::{UserToken, ENCODE_KEY};
 use crate::config::db::Pool;
-use crate::service::user_service::is_valid_login_session;
+use crate::service::auth_service::is_valid_login_session;
 use jsonwebtoken::{TokenData, DecodingKey, Validation};
 
 pub static SECRET_KEY: Lazy<String> = Lazy::new(||

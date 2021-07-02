@@ -42,5 +42,7 @@ CREATE TABLE login_history (
 
 -- for debugging --
 
-INSERT INTO themes (author, epoch_open, theme_text) 
-VALUES ('user1', current_timestamp, 'theme1'), ('user2', current_timestamp, 'theme2');
+INSERT INTO themes (author, epoch_open, theme_text) VALUES
+('user1', '2021-07-02 4:01:34.138663', 'theme1'),
+('user2', '2021-07-02 15:01:34.138663', 'theme2'),
+('user3', '2021-07-02 20:01:34.138663', 'theme3');
