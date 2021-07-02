@@ -39,3 +39,8 @@ CREATE TABLE login_history (
   epoch_login   TIMESTAMP NOT NULL,
   PRIMARY KEY (user_id)
 );
+
+-- for debugging --
+
+INSERT INTO themes (author, epoch_open, theme_text) 
+VALUES ('user1', current_timestamp, 'theme1'), ('user2', current_timestamp, 'theme2');

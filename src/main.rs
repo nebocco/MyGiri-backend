@@ -4,6 +4,7 @@
 
 use std::env;
 use actix_backend::server::run_server;
+use actix_backend::config::db;
 
 #[actix_web::main]
 async fn main() {
@@ -15,7 +16,7 @@ async fn main() {
     let database_url = env::var("SQL_URL").expect("SQL_URL is not set.");
     let port: u16 = 8008;
 
-    let pg_pool = sql_client::create_pool(&database_url)
+    let pg_pool = db::create_and_initialize_pool(&database_url)
         .await
         .expect("Failed to initialize the connection pool");
 

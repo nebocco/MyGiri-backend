@@ -62,4 +62,15 @@ async fn test_theme() {
     });
 
     assert_eq!(pool.get_themes_by_user("user3").await.unwrap().len(), 0);
+
+    // get themes of a day
+    let today = chrono::Local.ymd(2020, 10, 10).naive_local();
+    let themes = pool.get_themes_of_a_day(today).await.unwrap();
+    assert_eq!(themes.len(), 2);
+    assert_eq!(themes[0], Theme {
+        theme_id: Some(1),
+        author: "user1".to_string(),
+        epoch_open: chrono::Local.ymd(2020, 10, 10).and_hms(18, 30, 0).naive_local(),
+        theme_text: "theme1".to_string()
+    })
 }

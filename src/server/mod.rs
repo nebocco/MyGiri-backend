@@ -11,6 +11,7 @@ use sql_client::PgPool;
 use crate::config;
 
 pub(crate) mod user_api;
+pub(crate) mod theme_api;
 
 pub async fn run_server(pg_pool: PgPool, port: u16) -> std::io::Result<()> {
     HttpServer::new(move || {
@@ -25,7 +26,7 @@ pub async fn run_server(pg_pool: PgPool, port: u16) -> std::io::Result<()> {
                 .max_age(3600))
             .data(pg_pool.clone())
             .wrap(actix_web::middleware::Logger::default())
-            .wrap(crate::middleware::Authentication)
+            // .wrap(crate::middleware::Authentication)
             .wrap_fn(|req, srv| { srv.call(req) })
             .configure(config::app::config_services)
     })

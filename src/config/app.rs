@@ -32,6 +32,24 @@ pub fn config_services(cfg: &mut web::ServiceConfig) {
                             .route(web::post().to(user_api::update_name))
                     )
             )
+            .service(
+                web::scope("/theme")
+                    .service(
+                        web::resource("/{id}")
+                            .route(web::get().to(theme_api::get_theme_by_id))
+                    )
+            )
+            .service(
+                web::scope("/themes")
+                    .service(
+                        web::resource("/date/{date}")
+                            .route(web::get().to(theme_api::get_themes_by_date))
+                    )
+                    .service(
+                        web::resource("/user/{user_id}")
+                            .route(web::get().to(theme_api::get_themes_by_user))
+                    )
+            )
             // .service(
             //     web::scope("/address-book")
             //         .service(

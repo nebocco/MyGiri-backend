@@ -5,11 +5,13 @@
 use crate::{PgPool, PgRow, Row, Result};
 use crate::models::Theme;
 use async_trait::async_trait;
+use chrono::{NaiveDate, Duration};
 
 #[async_trait]
 pub trait ThemeClient {
     async fn get_theme_by_id(&self, theme_id: i32) -> Result<Theme>;
     async fn get_themes_by_user(&self, user_id: &str) -> Result<Vec<Theme>>;
+    async fn get_themes_of_a_day(&self, date: NaiveDate) -> Result<Vec<Theme>>;
     async fn post_theme(&self, theme: Theme) -> Result<i32>;
 }
 
@@ -65,13 +67,43 @@ impl ThemeClient for PgPool {
         Ok(themes)
     }
 
+    async fn get_themes_of_a_day(&self, date: NaiveDate) -> Result<Vec<Theme>> {
+        let this_day = date.and_hms(0, 0, 0);
+        let next_day = this_day + Duration::days(1);
+        let themes = sqlx::query(
+            r"
+            SELECT theme_id, author, epoch_open, theme_text FROM themes
+            WHERE epoch_open >= $1
+            AND epoch_open < $2
+            ORDER BY epoch_open
+            ",
+        )
+        .bind(this_day)
+        .bind(next_day)
+        .try_map(|row: PgRow| {
+            let theme_id = row.try_get("theme_id")?;
+            let author = row.try_get("author")?;
+            let epoch_open = row.try_get("epoch_open")?;
+            let theme_text = row.try_get("theme_text")?;
+            Ok(Theme{
+                theme_id: Some(theme_id),
+                author,
+                epoch_open,
+                theme_text,
+            })
+        })
+        .fetch_all(self)
+        .await?;
+        Ok(themes)
+    }
+
 
     async fn post_theme(&self, theme: Theme) -> Result<i32> {
         let theme_id: i32 = sqlx::query(
             r"
             INSERT INTO themes (author, epoch_open, theme_text)
             VALUES ($1, $2, $3)
-            RETURNING theme, _id
+            RETURNING theme_id
             ",
         )
         .bind(theme.author)
