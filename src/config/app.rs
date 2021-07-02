@@ -35,8 +35,12 @@ pub fn config_services(cfg: &mut web::ServiceConfig) {
             .service(
                 web::scope("/theme")
                     .service(
-                        web::resource("/{id}")
-                            .route(web::get().to(theme_api::get_theme_by_id))
+                        web::scope("/{id}")
+                            .service(
+                                web::resource("")
+                                    .route(web::get().to(theme_api::get_theme_by_id))
+                                    .route(web::post().to(answer_api::post_answer))
+                            )
                     )
             )
             .service(
@@ -48,6 +52,17 @@ pub fn config_services(cfg: &mut web::ServiceConfig) {
                     .service(
                         web::resource("/user/{user_id}")
                             .route(web::get().to(theme_api::get_themes_by_user))
+                    )
+            )
+            .service(
+                web::scope("/answers")
+                    .service(
+                        web::resource("/theme/{theme_id}")
+                            .route(web::get().to(answer_api::get_answers_by_theme))
+                    )
+                    .service(
+                        web::resource("/user/{user_id}")
+                            .route(web::get().to(answer_api::get_answers_by_user))
                     )
             )
             // .service(

@@ -21,15 +21,16 @@ CREATE INDEX ON themes (epoch_open);
 
 DROP TABLE IF EXISTS answers;
 CREATE TABLE answers (
+  id            SERIAL
   user_id       VARCHAR(100) NOT NULL,
   theme_id      INTEGER NOT NULL,
   epoch_submit  TIMESTAMP NOT NULL,
   answer_text   VARCHAR(255) NOT NULL,
-  like_count    INTEGER NOT NULL,
-  love_count    INTEGER NOT NULL,
+  score         INTEGER NOT NULL,
   voted         BOOLEAN NOT NULL,
   PRIMARY KEY (user_id, theme_id)
 );
+CREATE INDEX ON answers (id);
 CREATE INDEX ON answers (user_id);
 CREATE INDEX ON answers (theme_id);
 
@@ -38,6 +39,14 @@ CREATE TABLE login_history (
   user_id       VARCHAR(100) NOT NULL,
   epoch_login   TIMESTAMP NOT NULL,
   PRIMARY KEY (user_id)
+);
+
+DROP TABLE IF EXISTS votes;
+CREATE TABLE votes (
+  user_id      VARCHAR(100) NOT NULL,
+  theme_id     INTEGER NOT NULL,
+  answer_id    INTEGER NOT NULL,
+  score        INTEGER NOT NULL,
 );
 
 -- for debugging --

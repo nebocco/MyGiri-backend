@@ -54,12 +54,12 @@ impl Theme {
 
 #[derive(Debug, PartialEq, Serialize)]
 pub struct Answer {
+    pub id: Option<i32>,
     pub user_id: String,
     pub theme_id: i32,
     pub epoch_submit: NaiveDateTime,
     pub answer_text: String,
-    pub like_count: i32,
-    pub love_count: i32,
+    pub score: i32,
     pub voted: bool
 }
 
@@ -70,12 +70,12 @@ impl Answer {
         text: &str
     ) -> Self {
         Answer {
+            id: None,
             user_id: user_id.to_string(),
             theme_id,
             epoch_submit: chrono::Local::now().naive_local(),
             answer_text: text.to_string(),
-            like_count: 0,
-            love_count: 0,
+            score: 0,
             voted: false
         }
     }
@@ -85,4 +85,12 @@ impl Answer {
 pub struct LoginHistory {
     pub user_id: String,
     pub epoch_login: NaiveDateTime,
+}
+
+#[derive(Debug, PartialEq, Serialize)]
+pub struct Vote {
+    pub user_id: String,
+    pub theme_id: i32,
+    pub answer_id: i32,
+    pub score_id: i32,
 }

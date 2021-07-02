@@ -4,7 +4,7 @@
 
 use crate::{
     models::{
-        user::{UserDTO, UserNameData},
+        user::{ User, UserDTO, UserNameData },
         login::{ LoginDTO, UserToken, TokenBodyResponse }
     },
     config::db::Pool,
@@ -15,7 +15,7 @@ use crate::{
 use sql_client::{
     user_client::UserClient,
     login_history_client::LoginHistoryClient,
-    models::{ LoginHistory, User }
+    models::{ LoginHistory }
 };
 use actix_web::http::header::HeaderValue;
 
