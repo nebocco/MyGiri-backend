@@ -35,11 +35,23 @@ pub fn config_services(cfg: &mut web::ServiceConfig) {
             .service(
                 web::scope("/theme")
                     .service(
-                        web::scope("/{id}")
+                        web::scope("/{theme_id}")
                             .service(
                                 web::resource("")
                                     .route(web::get().to(theme_api::get_theme_by_id))
                                     .route(web::post().to(answer_api::post_answer))
+                            )
+                            .service(
+                                web::scope("/vote")
+                                    .service(
+                                        web::resource("/")
+                                        .route(web::get().to(vote_api::summarize_result))   
+                                        .route(web::post().to(vote_api::post_votes))   
+                                    )
+                                    .service(
+                                        web::resource("/{user_id}")
+                                        .route(web::get().to(vote_api::get_answers_by_user_and_theme))
+                                    )
                             )
                     )
             )

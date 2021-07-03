@@ -2,7 +2,7 @@
 // Code released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 
-use serde::Serialize;
+use serde::{Serialize, Deserialize};
 use chrono::NaiveDateTime;
 
 #[derive(Debug, PartialEq, Clone, Serialize)]
@@ -59,7 +59,7 @@ pub struct Answer {
     pub theme_id: i32,
     pub epoch_submit: NaiveDateTime,
     pub answer_text: String,
-    pub score: i32,
+    pub score: i64,
     pub voted: bool
 }
 
@@ -87,10 +87,10 @@ pub struct LoginHistory {
     pub epoch_login: NaiveDateTime,
 }
 
-#[derive(Debug, PartialEq, Serialize)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct Vote {
     pub user_id: String,
     pub theme_id: i32,
     pub answer_id: i32,
-    pub score_id: i32,
+    pub score: i32,
 }

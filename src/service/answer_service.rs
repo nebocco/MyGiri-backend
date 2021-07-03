@@ -30,7 +30,7 @@ pub async fn get_answers_by_user(user_id: &str, pool: &Pool) -> Result<Vec<Answe
     )
 }
 
-pub async fn post_answer(answer_dto: AnswerDTO, pool: &Pool) -> Result<(), ServiceError> {
+pub async fn post_answer(answer_dto: AnswerDTO, pool: &Pool) -> Result<i32, ServiceError> {
     let answer = Answer {
         id: None,
         user_id: answer_dto.user_id,

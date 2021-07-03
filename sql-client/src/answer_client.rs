@@ -11,7 +11,7 @@ pub trait AnswerClient {
     async fn get_answers_by_user(&self, user_id: &str) -> Result<Vec<Answer>>;
     async fn get_answers_by_theme(&self, theme_id: i32) -> Result<Vec<Answer>>;
     async fn get_answer_by_user_and_theme(&self, user_id: &str, theme_id: i32) -> Result<Answer>;
-    async fn post_answer(&self, answer: Answer) -> Result<()>;
+    async fn post_answer(&self, answer: Answer) -> Result<i32>;
 }
 
 #[async_trait]
@@ -116,8 +116,8 @@ impl AnswerClient for PgPool {
         Ok(answer)
     }
 
-    async fn post_answer(&self, answer: Answer) -> Result<()> {
-        sqlx::query(
+    async fn post_answer(&self, answer: Answer) -> Result<i32> {
+        let id = sqlx::query(
             r"
             INSERT INTO answers (user_id, theme_id, epoch_submit, answer_text, score, voted)
             VALUES ($1, $2, $3, $4, $5, $6)
@@ -125,6 +125,7 @@ impl AnswerClient for PgPool {
             epoch_submit = EXCLUDED.epoch_submit,
             answer_text = EXCLUDED.answer_text,
             score = EXCLUDED.score
+            RETURNING id
             ",
         )
         .bind(answer.user_id)
@@ -133,8 +134,12 @@ impl AnswerClient for PgPool {
         .bind(answer.answer_text)
         .bind(answer.score)
         .bind(answer.voted)
-        .execute(self)
+        .try_map(|row: PgRow| {
+            let id = row.try_get("id")?;
+            Ok(id)
+        })
+        .fetch_one(self)
         .await?;
-        Ok(())
+        Ok(id)
     }
 }

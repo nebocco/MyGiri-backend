@@ -13,6 +13,7 @@ use crate::config;
 pub(crate) mod user_api;
 pub(crate) mod theme_api;
 pub(crate) mod answer_api;
+pub(crate) mod vote_api;
 
 pub async fn run_server(pg_pool: PgPool, port: u16) -> std::io::Result<()> {
     HttpServer::new(move || {
