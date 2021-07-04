@@ -13,6 +13,8 @@ use crate::{
 use sql_client::answer_client::AnswerClient;
 
 pub async fn get_answers_by_theme(theme_id: i32, pool: &Pool) -> Result<Vec<Answer>, ServiceError> {
+    log::info!("{:?}", pool.get_answers_by_theme(theme_id).await);
+    
     pool.get_answers_by_theme(theme_id).await.map_err(|_| 
         ServiceError::new(
             StatusCode::INTERNAL_SERVER_ERROR,

@@ -44,14 +44,17 @@ pub fn config_services(cfg: &mut web::ServiceConfig) {
                             .service(
                                 web::scope("/vote")
                                     .service(
-                                        web::resource("/")
-                                        .route(web::get().to(vote_api::summarize_result))   
+                                        web::resource("")
                                         .route(web::post().to(vote_api::post_votes))   
                                     )
                                     .service(
                                         web::resource("/{user_id}")
-                                        .route(web::get().to(vote_api::get_answers_by_user_and_theme))
+                                        .route(web::get().to(vote_api::get_votes_by_user_and_theme))
                                     )
+                            )
+                            .service(
+                                web::resource("/result")
+                                .route(web::get().to(vote_api::summarize_result))
                             )
                     )
             )

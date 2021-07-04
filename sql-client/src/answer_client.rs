@@ -32,7 +32,7 @@ impl AnswerClient for PgPool {
             let theme_id = row.try_get("theme_id")?;
             let epoch_submit = row.try_get("epoch_submit")?;
             let answer_text = row.try_get("answer_text")?;
-            let score = row.try_get("score")?;
+            let score: i32 = row.try_get("score")?;
             let voted = row.try_get("voted")?;
             Ok(Answer{
                 id: Some(id),
@@ -40,7 +40,7 @@ impl AnswerClient for PgPool {
                 theme_id,
                 epoch_submit,
                 answer_text,
-                score,
+                score: score as i64,
                 voted
             })
         })
@@ -65,7 +65,7 @@ impl AnswerClient for PgPool {
             let theme_id = row.try_get("theme_id")?;
             let epoch_submit = row.try_get("epoch_submit")?;
             let answer_text = row.try_get("answer_text")?;
-            let score = row.try_get("score")?;
+            let score: i32 = row.try_get("score")?;
             let voted = row.try_get("voted")?;
             Ok(Answer{
                 id: Some(id),
@@ -73,7 +73,7 @@ impl AnswerClient for PgPool {
                 theme_id,
                 epoch_submit,
                 answer_text,
-                score,
+                score: score as i64,
                 voted
             })
         })
@@ -99,7 +99,7 @@ impl AnswerClient for PgPool {
             let theme_id = row.try_get("theme_id")?;
             let epoch_submit = row.try_get("epoch_submit")?;
             let answer_text = row.try_get("answer_text")?;
-            let score = row.try_get("score")?;
+            let score: i32 = row.try_get("score")?;
             let voted = row.try_get("voted")?;
             Ok(Answer{
                 id: Some(id),
@@ -107,7 +107,7 @@ impl AnswerClient for PgPool {
                 theme_id,
                 epoch_submit,
                 answer_text,
-                score,
+                score: score as i64,
                 voted
             })
         })

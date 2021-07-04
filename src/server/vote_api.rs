@@ -39,13 +39,13 @@ pub async fn summarize_result(
 }
 
 // Get /api/theme/{id}/vote/{user_id}
-pub async fn get_answers_by_user_and_theme(
-    theme_id: web::Path<i32>,
-    user_id: web::Path<String>,
+pub async fn get_votes_by_user_and_theme(
+    params: web::Path<(i32, String)>,
     pool: web::Data<Pool>
 ) -> Result<HttpResponse> {
+    let (theme_id, user_id) = params.into_inner();
     match vote_service::get_votes_by_user_and_theme(
-        user_id.into_inner().as_ref(), theme_id.into_inner(), pool.get_ref()
+        user_id.as_ref(), theme_id, pool.get_ref()
     ).await {
         Ok(themes) => Ok(
             HttpResponse::Ok()
