@@ -15,7 +15,7 @@ pub(crate) mod theme_api;
 pub(crate) mod answer_api;
 pub(crate) mod vote_api;
 
-pub async fn run_server(pg_pool: PgPool, host: &str, port: u16) -> std::io::Result<()> {
+pub async fn run_server(pg_pool: PgPool, port: u16) -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .wrap(Cors::default() // allowed_origin return access-control-allow-origin: * by default
@@ -32,7 +32,7 @@ pub async fn run_server(pg_pool: PgPool, host: &str, port: u16) -> std::io::Resu
             .wrap_fn(|req, srv| { srv.call(req) })
             .configure(config::app::config_services)
     })
-    .bind(format!("{}:{}", host, port))?
+    .bind(format!("localhost:{}", port))?
     .run()
     .await
 }
