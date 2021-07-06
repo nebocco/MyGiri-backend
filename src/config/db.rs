@@ -4,7 +4,7 @@ use std::fs::File;
 use std::io::prelude::*;
 
 pub type Pool = PgPool;
-const SQL_FILE: &str = "./config/init.sql";
+const SQL_FILE: &str = "./sql_cilent/config/init.sql";
 
 pub async fn create_and_initialize_pool(sql_url: &str) -> Result<PgPool> {
     let pool = sql_client::create_pool(sql_url).await?;

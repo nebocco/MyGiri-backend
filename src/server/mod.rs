@@ -15,12 +15,12 @@ pub(crate) mod theme_api;
 pub(crate) mod answer_api;
 pub(crate) mod vote_api;
 
-pub async fn run_server(pg_pool: PgPool, port: u16) -> std::io::Result<()> {
+pub async fn run_server(pg_pool: PgPool, port: u16, app_port: u16) -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .wrap(Cors::default() // allowed_origin return access-control-allow-origin: * by default
-            .allowed_origin("http://127.0.0.1:8080")
-            .allowed_origin("http://localhost:8080")
+            .allowed_origin(format!("http://127.0.0.1:{:04}", app_port))
+            .allowed_origin(format!("http://localhost:{:04}", app_port))
                 .send_wildcard()
                 .allowed_methods(vec!["GET", "POST", "PUT", "DELETE"])
                 .allowed_headers(vec![http::header::AUTHORIZATION, http::header::ACCEPT])
