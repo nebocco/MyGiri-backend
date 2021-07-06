@@ -4,7 +4,8 @@ use actix_web::{
 use crate::service::theme_service;
 use crate::config::db::Pool;
 use crate::models::{
-    response::ResponseBody
+    response::ResponseBody,
+    theme::ThemeDTO
 };
 use crate::constants;
 use chrono::NaiveDate;
@@ -49,6 +50,19 @@ pub async fn get_themes_by_user(
             HttpResponse::Ok()
             .set_header("Cache-Control", "max-age=300")
             .json(ResponseBody::new(constants::MESSAGE_OK, themes))),
+        Err(err) => Ok(err.response())
+    }
+}
+
+pub async fn post_theme(
+    theme_dto: web::Json<ThemeDTO>,
+    pool: web::Data<Pool>
+) -> Result<HttpResponse> {
+    match theme_service::post_theme(theme_dto.into_inner(), pool.get_ref()).await {
+        Ok(_) => Ok(
+            HttpResponse::Ok()
+            .json(ResponseBody::new(constants::MESSAGE_OK, constants::EMPTY))
+        ),
         Err(err) => Ok(err.response())
     }
 }

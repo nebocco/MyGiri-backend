@@ -35,6 +35,10 @@ pub fn config_services(cfg: &mut web::ServiceConfig) {
             .service(
                 web::scope("/theme")
                     .service(
+                        web::resource("")
+                            .route(web::post().to(theme_api::post_theme))
+                    )
+                    .service(
                         web::scope("/{theme_id}")
                             .service(
                                 web::resource("")
@@ -80,23 +84,5 @@ pub fn config_services(cfg: &mut web::ServiceConfig) {
                             .route(web::get().to(answer_api::get_answers_by_user))
                     )
             )
-            // .service(
-            //     web::scope("/address-book")
-            //         .service(
-            //             web::resource("")
-            //                 .route(web::get().to(address_book_controller::find_all))
-            //                 .route(web::post().to(address_book_controller::insert))
-            //         )
-            //         .service(
-            //             web::resource("/{id}")
-            //                 .route(web::get().to(address_book_controller::find_by_id))
-            //                 .route(web::put().to(address_book_controller::update))
-            //                 .route(web::delete().to(address_book_controller::delete))
-            //         )
-            //         .service(
-            //             web::resource("/query/{query}")
-            //                 .route(web::get().to(address_book_controller::query))   
-            //         )
-            // )
     );
 }
