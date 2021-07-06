@@ -3,10 +3,7 @@
 // https://opensource.org/licenses/mit-license.php
 
 use crate::{
-    models::{
-        answer::Answer,
-        vote::Vote,
-    },
+    models::vote::{ Vote, VoteResult },
     constants,
     config::db::Pool,
     errors::{ ServiceError, StatusCode }
@@ -22,7 +19,7 @@ pub async fn get_votes_by_user_and_theme(user_id: &str, theme_id: i32, pool: &Po
     )
 }
 
-pub async fn summarize_result(theme_id: i32, pool: &Pool) -> Result<Vec<Answer>, ServiceError> {
+pub async fn summarize_result(theme_id: i32, pool: &Pool) -> Result<Vec<VoteResult>, ServiceError> {
     pool.summarize_result(theme_id).await.map_err(|_| 
         ServiceError::new(
             StatusCode::INTERNAL_SERVER_ERROR,

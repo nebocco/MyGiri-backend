@@ -3,8 +3,8 @@ use sqlx::Executor;
 use std::fs::File;
 use std::io::prelude::*;
 
-const SQL_FILE: &str = "../config/init.sql";
-const SQL_URL_ENV_KEY: &str = "SQL_URL";
+const SQL_FILE: &str = "./config/init.sql";
+const SQL_URL_ENV_KEY: &str = "DATABASE_URL";
 
 pub async fn initialize_and_connect_to_test_sql() -> PgPool {
     let sql_url = std::env::var(SQL_URL_ENV_KEY).unwrap();

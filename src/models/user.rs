@@ -6,6 +6,7 @@ pub use sql_client::models::User;
 pub struct UserDTO {
     pub user_id: String,
     pub password: String,
+    pub display_name: Option<String>,
 }
 
 #[derive(Deserialize)]

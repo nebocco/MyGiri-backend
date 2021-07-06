@@ -29,7 +29,7 @@ pub async fn create_user(user: UserDTO, pool: &Pool) -> Result<String, ServiceEr
         ));
     }
     let hashed_pwd = hash_password(&user.password).unwrap();
-    let new_user = User::new(&user.user_id, None, &hashed_pwd);
+    let new_user = User::new(&user.user_id, user.display_name.as_deref(), &hashed_pwd);
     if pool.signup_user(new_user).await.is_ok() {
         Ok(constants::MESSAGE_SIGNUP_SUCCESS.to_string())
     } else {

@@ -3,13 +3,13 @@
 // https://opensource.org/licenses/mit-license.php
 
 use crate::{PgPool, PgRow, Row, Result};
-use crate::models::{ Answer, Vote };
+use crate::models::{ VoteResult, Vote };
 use async_trait::async_trait;
 
 #[async_trait]
 pub trait VoteClient {
     async fn get_votes_by_user_and_theme(&self, user_id: &str, theme_id: i32) -> Result<Vec<Vote>>;
-    async fn summarize_result(&self, theme_id: i32) -> Result<Vec<Answer>>;
+    async fn summarize_result(&self, theme_id: i32) -> Result<Vec<VoteResult>>;
     async fn post_votes(
         &self, 
         user_id: &str,
@@ -46,12 +46,13 @@ impl VoteClient for PgPool {
 
         Ok(votes)
     }
-    async fn summarize_result(&self, theme_id: i32) -> Result<Vec<Answer>> {
+    async fn summarize_result(&self, theme_id: i32) -> Result<Vec<VoteResult>> {
         let mut answers = sqlx::query(
             r"
             SELECT 
                 a.id,
                 a.user_id,
+                u.display_name,
                 a.theme_id,
                 a.epoch_submit,
                 a.answer_text,
@@ -66,6 +67,13 @@ impl VoteClient for PgPool {
                 GROUP BY answer_id
             ) v
             ON a.id = v.answer_id
+            LEFT JOIN (
+                SELECT
+                user_id,
+                display_name
+                FROM users
+            ) u
+            ON a.user_id = u.user_id
             WHERE theme_id = $1
             ",
         )
@@ -73,14 +81,16 @@ impl VoteClient for PgPool {
         .try_map(|row: PgRow| {
             let id = row.try_get("id")?;
             let user_id = row.try_get("user_id")?;
+            let display_name = row.try_get("display_name")?;
             let theme_id = row.try_get("theme_id")?;
             let epoch_submit = row.try_get("epoch_submit")?;
             let answer_text = row.try_get("answer_text")?;
             let score: i64 = row.try_get("score")?;
             let voted = row.try_get("voted")?;
-            Ok(Answer{
+            Ok(VoteResult {
                 id: Some(id),
                 user_id,
+                display_name,
                 theme_id,
                 epoch_submit,
                 answer_text,

@@ -2,9 +2,10 @@
 // Code released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 
-use sql_client::models::{ Vote, Answer };
+use sql_client::models::{ Vote, Answer, VoteResult, User };
 use sql_client::vote_client::VoteClient;
 use sql_client::answer_client::AnswerClient;
+use sql_client::user_client::UserClient;
 use chrono::TimeZone;
 mod utils;
 
@@ -38,7 +39,7 @@ async fn test_vote() {
     // get votes by user and theme
     let user1_theme1 = pool.get_votes_by_user_and_theme("user1", 1).await.unwrap();
     assert_eq!(user1_theme1.len(), 2);
-    assert_eq!(user1_theme1[0], Vote{
+    assert_eq!(user1_theme1[0], Vote {
         user_id: "user1".to_string(),
         theme_id: 1,
         answer_id: 1,
@@ -80,18 +81,20 @@ async fn test_vote() {
     }
     let theme1 = pool.summarize_result(1).await.unwrap();
     assert_eq!(theme1.len(), 3);
-    assert_eq!(theme1[0], Answer {
+    assert_eq!(theme1[0], VoteResult {
         id: Some(2),
         user_id: "user2".to_string(),
+        display_name: None,
         theme_id: 1,
         epoch_submit: chrono::Local.ymd(2020, 10, 10).and_hms(18, 30, 0).naive_local(),
         answer_text: "answer2".to_string(),
         score: 1000010,
         voted: false,
     });
-    assert_eq!(theme1[2], Answer {
+    assert_eq!(theme1[2], VoteResult {
         id: Some(3),
         user_id: "user3".to_string(),
+        display_name: None,
         theme_id: 1,
         epoch_submit: chrono::Local.ymd(1996, 1, 1).and_hms(7, 3, 0).naive_local(),
         answer_text: "answer3".to_string(),
@@ -113,30 +116,39 @@ async fn test_vote() {
     ).collect();
 
     pool.post_votes("user1", 1, user1).await.unwrap();
+    pool.signup_user(User {
+        user_id: "user3".to_string(),
+        display_name: Some("ゆーざー".to_string()),
+        hash: "".to_string(),
+        login_session: "".to_string()
+    }).await.unwrap();
     let theme1 = pool.summarize_result(1).await.unwrap();
     println!("{:?}", &theme1);
     assert_eq!(theme1.len(), 3);
-    assert_eq!(theme1[0], Answer {
+    assert_eq!(theme1[0], VoteResult {
         id: Some(3),
         user_id: "user3".to_string(),
+        display_name: Some("ゆーざー".to_string()),
         theme_id: 1,
         epoch_submit: chrono::Local.ymd(1996, 1, 1).and_hms(7, 3, 0).naive_local(),
         answer_text: "answer3".to_string(),
         score: 1000100000,
         voted: true,
     });
-    assert_eq!(theme1[1], Answer {
+    assert_eq!(theme1[1], VoteResult {
         id: Some(2),
         user_id: "user2".to_string(),
+        display_name: None,
         theme_id: 1,
         epoch_submit: chrono::Local.ymd(2020, 10, 10).and_hms(18, 30, 0).naive_local(),
         answer_text: "answer2".to_string(),
         score: 1000000,
         voted: false,
     });
-    assert_eq!(theme1[2], Answer {
+    assert_eq!(theme1[2], VoteResult {
         id: Some(1),
         user_id: "user1".to_string(),
+        display_name: None,
         theme_id: 1,
         epoch_submit: chrono::Local.ymd(2020, 10, 10).and_hms(17, 30, 0).naive_local(),
         answer_text: "answer1".to_string(),

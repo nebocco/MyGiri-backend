@@ -94,3 +94,16 @@ pub struct Vote {
     pub answer_id: i32,
     pub score: i32,
 }
+
+
+#[derive(Debug, PartialEq, Serialize)]
+pub struct VoteResult {
+    pub id: Option<i32>,
+    pub user_id: String,
+    pub display_name: Option<String>,
+    pub theme_id: i32,
+    pub epoch_submit: NaiveDateTime,
+    pub answer_text: String,
+    pub score: i64,
+    pub voted: bool
+}
