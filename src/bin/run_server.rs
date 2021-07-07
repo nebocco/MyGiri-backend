@@ -13,13 +13,11 @@ async fn main() {
     env_logger::init();
 
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL is not set.");
-    let port: u16 = std::env::var("PORT_API").expect("PORT_API is not set.")
-        .parse::<u16>().unwrap();
-    let app_port: u16 = std::env::var("PORT").unwrap_or("5000".to_string())
+    let port: u16 = std::env::var("PORT").unwrap_or("5000".to_string())
         .parse::<u16>().unwrap();
     let pg_pool = create_pool(&database_url)
         .await
         .expect("Failed to initialize the connection pool");
 
-    run_server(pg_pool, port, app_port).await.expect("Failed to run server");
+    run_server(pg_pool, port).await.expect("Failed to run server");
 }
