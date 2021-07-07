@@ -8,12 +8,11 @@ use sql_client::create_pool;
 
 #[actix_web::main]
 async fn main() {
-    dotenv::dotenv().ok();
     std::env::set_var("RUST_LOG", "actix_web=debug");
     env_logger::init();
 
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL is not set.");
-    let port: u16 = std::env::var("PORT").unwrap_or("5000".to_string())
+    let port: u16 = env::var("PORT").expect("PORT is not set.")
         .parse::<u16>().unwrap();
     let pg_pool = create_pool(&database_url)
         .await

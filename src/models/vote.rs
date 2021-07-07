@@ -1,5 +1,5 @@
 use serde::{Deserialize};
-pub use sql_client::models::{ Vote, VoteResult };
+pub use sql_client::models::Vote;
 
 #[derive(Deserialize)]
 pub struct VoteRequest {

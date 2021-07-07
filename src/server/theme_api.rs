@@ -8,7 +8,7 @@ use crate::models::{
     theme::ThemeDTO
 };
 use crate::constants;
-use chrono::NaiveDate;
+use chrono::{ Date, TimeZone, Local, NaiveDate };
 
 // Get /api/theme/{id}
 pub async fn get_theme_by_id(
@@ -30,7 +30,8 @@ pub async fn get_themes_by_date(
     date: web::Path<String>,
     pool: web::Data<Pool>
 ) -> Result<HttpResponse> {
-    let date = NaiveDate::parse_from_str(date.into_inner().as_ref(), "%Y-%m-%d").unwrap();
+    let naive_date = NaiveDate::parse_from_str(date.into_inner().as_ref(), "%Y-%m-%d").unwrap();
+    let date: Date<Local> = Local.from_local_date(&naive_date).unwrap();
     match theme_service::get_themes_by_date(date, pool.get_ref()).await {
         Ok(themes) => Ok(
             HttpResponse::Ok()

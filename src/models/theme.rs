@@ -3,6 +3,6 @@ pub use sql_client::models::Theme;
 
 #[derive(Deserialize)]
 pub struct ThemeDTO {
-    pub author: String,
+    pub user_id: String,
     pub theme_text: String
 }

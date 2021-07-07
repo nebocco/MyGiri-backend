@@ -36,8 +36,9 @@ pub async fn post_answer(answer_dto: AnswerDTO, pool: &Pool) -> Result<i32, Serv
     let answer = Answer {
         id: None,
         user_id: answer_dto.user_id,
+        display_name: None,
         theme_id: answer_dto.theme_id,
-        epoch_submit: chrono::Local::now().naive_local(),
+        epoch_submit: chrono::Local::now(),
         answer_text: answer_dto.answer_text,
         score: 0,
         voted: false

@@ -119,10 +119,9 @@ pub async fn create_login_history(user_id: &str, pool: &Pool) -> Result<LoginHis
         StatusCode::UNAUTHORIZED,
         constants::MESSAGE_USER_NOT_FOUND.to_string()
     ))?;
-    let now = chrono::Local::now();
     Ok(LoginHistory{
         user_id: user.user_id,
-        epoch_login: now.naive_local()
+        epoch_login: chrono::Local::now()
     })
 }
 
