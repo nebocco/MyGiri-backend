@@ -3,7 +3,7 @@
 // https://opensource.org/licenses/mit-license.php
 
 use serde::{Serialize, Deserialize};
-use chrono::NaiveDateTime;
+use chrono::{Local, DateTime};
 
 #[derive(Debug, PartialEq, Clone, Serialize)]
 pub struct User {
@@ -31,21 +31,23 @@ impl User {
 
 #[derive(Debug, PartialEq, Serialize)]
 pub struct Theme {
-    pub theme_id: Option<i32>,
-    pub author: String,
-    pub epoch_open: NaiveDateTime,
+    pub id: Option<i32>,
+    pub user_id: String,
+    pub display_name: Option<String>,
+    pub epoch_open: DateTime<Local>,
     pub theme_text: String
 }
 
 impl Theme {
     pub fn new(
-        author: &str,
-        epoch_open: impl Into<NaiveDateTime>,
+        user_id: &str,
+        epoch_open: impl Into<DateTime<Local>>,
         theme_text: &str
     ) -> Self {
         Theme {
-            theme_id: None,
-            author: author.to_string(),
+            id: None,
+            user_id: user_id.to_string(),
+            display_name: None,
             epoch_open: epoch_open.into(),
             theme_text: theme_text.to_string()
         }
@@ -56,8 +58,9 @@ impl Theme {
 pub struct Answer {
     pub id: Option<i32>,
     pub user_id: String,
+    pub display_name: Option<String>,
     pub theme_id: i32,
-    pub epoch_submit: NaiveDateTime,
+    pub epoch_submit: DateTime<Local>,
     pub answer_text: String,
     pub score: i64,
     pub voted: bool
@@ -72,8 +75,9 @@ impl Answer {
         Answer {
             id: None,
             user_id: user_id.to_string(),
+            display_name: None,
             theme_id,
-            epoch_submit: chrono::Local::now().naive_local(),
+            epoch_submit: chrono::Local::now(),
             answer_text: text.to_string(),
             score: 0,
             voted: false
@@ -84,7 +88,7 @@ impl Answer {
 #[derive(Debug, PartialEq, Serialize)]
 pub struct LoginHistory {
     pub user_id: String,
-    pub epoch_login: NaiveDateTime,
+    pub epoch_login: DateTime<Local>,
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
@@ -93,17 +97,4 @@ pub struct Vote {
     pub theme_id: i32,
     pub answer_id: i32,
     pub score: i32,
-}
-
-
-#[derive(Debug, PartialEq, Serialize)]
-pub struct VoteResult {
-    pub id: Option<i32>,
-    pub user_id: String,
-    pub display_name: Option<String>,
-    pub theme_id: i32,
-    pub epoch_submit: NaiveDateTime,
-    pub answer_text: String,
-    pub score: i64,
-    pub voted: bool
 }

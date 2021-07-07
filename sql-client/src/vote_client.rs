@@ -3,13 +3,13 @@
 // https://opensource.org/licenses/mit-license.php
 
 use crate::{PgPool, PgRow, Row, Result};
-use crate::models::{ VoteResult, Vote };
+use crate::models::{ Answer, Vote };
 use async_trait::async_trait;
 
 #[async_trait]
 pub trait VoteClient {
     async fn get_votes_by_user_and_theme(&self, user_id: &str, theme_id: i32) -> Result<Vec<Vote>>;
-    async fn summarize_result(&self, theme_id: i32) -> Result<Vec<VoteResult>>;
+    async fn summarize_result(&self, theme_id: i32) -> Result<Vec<Answer>>;
     async fn post_votes(
         &self, 
         user_id: &str,
@@ -46,7 +46,7 @@ impl VoteClient for PgPool {
 
         Ok(votes)
     }
-    async fn summarize_result(&self, theme_id: i32) -> Result<Vec<VoteResult>> {
+    async fn summarize_result(&self, theme_id: i32) -> Result<Vec<Answer>> {
         let mut answers = sqlx::query(
             r"
             SELECT 
@@ -87,7 +87,7 @@ impl VoteClient for PgPool {
             let answer_text = row.try_get("answer_text")?;
             let score: i64 = row.try_get("score")?;
             let voted = row.try_get("voted")?;
-            Ok(VoteResult {
+            Ok(Answer {
                 id: Some(id),
                 user_id,
                 display_name,

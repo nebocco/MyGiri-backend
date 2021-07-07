@@ -19,9 +19,24 @@ impl AnswerClient for PgPool {
     async fn get_answers_by_user(&self, user_id: &str) -> Result<Vec<Answer>> {
         let answers = sqlx::query(
             r"
-            SELECT id, user_id, theme_id, epoch_submit, answer_text, score, voted
-            FROM answers
-            WHERE LOWER(user_id) = LOWER($1)
+            SELECT
+                a.id,
+                a.user_id,
+                u.display_name,
+                a.theme_id,
+                a.epoch_submit,
+                a.answer_text,
+                a.score,
+                a.voted
+            FROM answers AS a
+            LEFT JOIN (
+                SELECT
+                    user_id,
+                    display_name
+                FROM users
+            ) u
+            ON a.user_id = u.user_id
+            WHERE LOWER(a.user_id) = LOWER($1)
             ORDER BY epoch_submit ASC
             ",
         )
@@ -29,14 +44,16 @@ impl AnswerClient for PgPool {
         .try_map(|row: PgRow| {
             let id = row.try_get("id")?;
             let user_id = row.try_get("user_id")?;
+            let display_name = row.try_get("display_name")?;
             let theme_id = row.try_get("theme_id")?;
             let epoch_submit = row.try_get("epoch_submit")?;
             let answer_text = row.try_get("answer_text")?;
             let score: i32 = row.try_get("score")?;
             let voted = row.try_get("voted")?;
             Ok(Answer{
-                id: Some(id),
+                id,
                 user_id,
+                display_name,
                 theme_id,
                 epoch_submit,
                 answer_text,
@@ -52,8 +69,23 @@ impl AnswerClient for PgPool {
     async fn get_answers_by_theme(&self, theme_id: i32) -> Result<Vec<Answer>> {
         let answers = sqlx::query(
             r"
-            SELECT id, user_id, theme_id, epoch_submit, answer_text, score, voted
-            FROM answers
+            SELECT
+                a.id,
+                a.user_id,
+                u.display_name,
+                a.theme_id,
+                a.epoch_submit,
+                a.answer_text,
+                a.score,
+                a.voted
+            FROM answers AS a
+            LEFT JOIN (
+                SELECT
+                    user_id,
+                    display_name
+                FROM users
+            ) u
+            ON a.user_id = u.user_id
             WHERE theme_id = $1
             ORDER BY epoch_submit ASC
             ",
@@ -62,14 +94,16 @@ impl AnswerClient for PgPool {
         .try_map(|row: PgRow| {
             let id = row.try_get("id")?;
             let user_id = row.try_get("user_id")?;
+            let display_name = row.try_get("display_name")?;
             let theme_id = row.try_get("theme_id")?;
             let epoch_submit = row.try_get("epoch_submit")?;
             let answer_text = row.try_get("answer_text")?;
             let score: i32 = row.try_get("score")?;
             let voted = row.try_get("voted")?;
             Ok(Answer{
-                id: Some(id),
+                id,
                 user_id,
+                display_name,
                 theme_id,
                 epoch_submit,
                 answer_text,
@@ -85,9 +119,24 @@ impl AnswerClient for PgPool {
     async fn get_answer_by_user_and_theme(&self, user_id: &str, theme_id: i32) -> Result<Answer> {
         let answer = sqlx::query(
             r"
-            SELECT id, user_id, theme_id, epoch_submit, answer_text, score, voted
-            FROM answers
-            WHERE LOWER(user_id) = LOWER($1)
+            SELECT
+                a.id,
+                a.user_id,
+                u.display_name,
+                a.theme_id,
+                a.epoch_submit,
+                a.answer_text,
+                a.score,
+                a.voted
+            FROM answers AS a
+            LEFT JOIN (
+                SELECT
+                    user_id,
+                    display_name
+                FROM users
+            ) u
+            ON a.user_id = u.user_id
+            WHERE LOWER(a.user_id) = LOWER($1)
             AND theme_id = $2
             ",
         )
@@ -96,14 +145,16 @@ impl AnswerClient for PgPool {
         .try_map(|row: PgRow| {
             let id = row.try_get("id")?;
             let user_id = row.try_get("user_id")?;
+            let display_name = row.try_get("display_name")?;
             let theme_id = row.try_get("theme_id")?;
             let epoch_submit = row.try_get("epoch_submit")?;
             let answer_text = row.try_get("answer_text")?;
             let score: i32 = row.try_get("score")?;
             let voted = row.try_get("voted")?;
             Ok(Answer{
-                id: Some(id),
+                id,
                 user_id,
+                display_name,
                 theme_id,
                 epoch_submit,
                 answer_text,

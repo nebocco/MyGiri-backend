@@ -5,13 +5,13 @@
 use crate::{PgPool, PgRow, Row, Result};
 use crate::models::Theme;
 use async_trait::async_trait;
-use chrono::{NaiveDate, Duration};
+use chrono::{Date, Local, Duration};
 
 #[async_trait]
 pub trait ThemeClient {
     async fn get_theme_by_id(&self, theme_id: i32) -> Result<Theme>;
     async fn get_themes_by_user(&self, user_id: &str) -> Result<Vec<Theme>>;
-    async fn get_themes_of_a_day(&self, date: NaiveDate) -> Result<Vec<Theme>>;
+    async fn get_themes_by_date(&self, date: Date<Local>) -> Result<Vec<Theme>>;
     async fn post_theme(&self, theme: Theme) -> Result<i32>;
 }
 
@@ -20,19 +20,34 @@ impl ThemeClient for PgPool {
     async fn get_theme_by_id(&self, theme_id: i32) -> Result<Theme> {
         let theme = sqlx::query(
             r"
-            SELECT theme_id, author, epoch_open, theme_text FROM themes
-            WHERE theme_id = $1
+            SELECT 
+                t.id,
+                t.user_id,
+                u.display_name,
+                t.epoch_open,
+                t.theme_text
+            FROM themes AS t
+            LEFT JOIN (
+                SELECT
+                    user_id,
+                    display_name
+                FROM users
+            ) u
+            ON t.user_id = u.user_id
+            WHERE t.id = $1
             ",
         )
         .bind(theme_id)
         .try_map(|row: PgRow| {
-            let theme_id = row.try_get("theme_id")?;
-            let author = row.try_get("author")?;
+            let id = row.try_get("id")?;
+            let user_id = row.try_get("user_id")?;
+            let display_name = row.try_get("display_name")?;
             let epoch_open = row.try_get("epoch_open")?;
             let theme_text = row.try_get("theme_text")?;
             Ok(Theme{
-                theme_id: Some(theme_id),
-                author,
+                id,
+                user_id,
+                display_name,
                 epoch_open,
                 theme_text,
             })
@@ -45,19 +60,34 @@ impl ThemeClient for PgPool {
     async fn get_themes_by_user(&self, user_id: &str) -> Result<Vec<Theme>> {
         let themes = sqlx::query(
             r"
-            SELECT theme_id, author, epoch_open, theme_text FROM themes
-            WHERE LOWER(author) = LOWER($1)
+            SELECT 
+                t.id,
+                t.user_id,
+                u.display_name,
+                t.epoch_open,
+                t.theme_text
+            FROM themes AS t
+            LEFT JOIN (
+                SELECT
+                    user_id,
+                    display_name
+                FROM users
+            ) u
+            ON t.user_id = u.user_id
+            WHERE LOWER(t.user_id) = LOWER($1)
             ",
         )
         .bind(user_id)
         .try_map(|row: PgRow| {
-            let theme_id = row.try_get("theme_id")?;
-            let author = row.try_get("author")?;
+            let id = row.try_get("id")?;
+            let user_id = row.try_get("user_id")?;
+            let display_name = row.try_get("display_name")?;
             let epoch_open = row.try_get("epoch_open")?;
             let theme_text = row.try_get("theme_text")?;
             Ok(Theme{
-                theme_id: Some(theme_id),
-                author,
+                id,
+                user_id,
+                display_name,
                 epoch_open,
                 theme_text,
             })
@@ -67,12 +97,25 @@ impl ThemeClient for PgPool {
         Ok(themes)
     }
 
-    async fn get_themes_of_a_day(&self, date: NaiveDate) -> Result<Vec<Theme>> {
+    async fn get_themes_by_date(&self, date: Date<Local>) -> Result<Vec<Theme>> {
         let this_day = date.and_hms(0, 0, 0);
         let next_day = this_day + Duration::days(1);
         let themes = sqlx::query(
             r"
-            SELECT theme_id, author, epoch_open, theme_text FROM themes
+            SELECT 
+                t.id,
+                t.user_id,
+                u.display_name,
+                t.epoch_open,
+                t.theme_text
+            FROM themes AS t
+            LEFT JOIN (
+                SELECT
+                    user_id,
+                    display_name
+                FROM users
+            ) u
+            ON t.user_id = u.user_id
             WHERE epoch_open >= $1
             AND epoch_open < $2
             ORDER BY epoch_open
@@ -81,13 +124,15 @@ impl ThemeClient for PgPool {
         .bind(this_day)
         .bind(next_day)
         .try_map(|row: PgRow| {
-            let theme_id = row.try_get("theme_id")?;
-            let author = row.try_get("author")?;
+            let id = row.try_get("id")?;
+            let user_id = row.try_get("user_id")?;
+            let display_name = row.try_get("display_name")?;
             let epoch_open = row.try_get("epoch_open")?;
             let theme_text = row.try_get("theme_text")?;
             Ok(Theme{
-                theme_id: Some(theme_id),
-                author,
+                id,
+                user_id,
+                display_name,
                 epoch_open,
                 theme_text,
             })
@@ -101,17 +146,17 @@ impl ThemeClient for PgPool {
     async fn post_theme(&self, theme: Theme) -> Result<i32> {
         let theme_id: i32 = sqlx::query(
             r"
-            INSERT INTO themes (author, epoch_open, theme_text)
+            INSERT INTO themes (user_id, epoch_open, theme_text)
             VALUES ($1, $2, $3)
-            RETURNING theme_id
+            RETURNING id
             ",
         )
-        .bind(theme.author)
+        .bind(theme.user_id)
         .bind(theme.epoch_open)
         .bind(theme.theme_text)
         .try_map(|row: PgRow| {
-            let theme_id: i32 = row.try_get("theme_id")?;
-            Ok(theme_id)
+            let id: i32 = row.try_get("id")?;
+            Ok(id)
         })
         .fetch_one(self)
         .await?;

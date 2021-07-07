@@ -14,15 +14,15 @@ async fn test_login_history() {
     let histories = vec![
         LoginHistory {
             user_id: "user1".to_string(),
-            epoch_login: chrono::Local.ymd(2020, 10, 10).and_hms(17, 30, 00).naive_local()
+            epoch_login: chrono::Local.ymd(2020, 10, 10).and_hms(17, 30, 00)
         },
         LoginHistory {
             user_id: "user2".to_string(),
-            epoch_login: chrono::Local.ymd(2020, 10, 10).and_hms(17, 30, 00).naive_local()
+            epoch_login: chrono::Local.ymd(2020, 10, 10).and_hms(17, 30, 00)
         },
         LoginHistory {
             user_id: "user3".to_string(),
-            epoch_login: chrono::Local.ymd(2021, 8, 31).and_hms(23, 59, 59).naive_local()
+            epoch_login: chrono::Local.ymd(2021, 8, 31).and_hms(23, 59, 59)
         },
     ];
     for history in histories {
@@ -31,36 +31,36 @@ async fn test_login_history() {
     
     let user1 = pool.get_login_history_by_user("user1").await.unwrap();
     assert_eq!(user1.user_id, "user1".to_string());
-    assert_eq!(user1.epoch_login, chrono::Local.ymd(2020, 10, 10).and_hms(17, 30, 00).naive_local());
+    assert_eq!(user1.epoch_login, chrono::Local.ymd(2020, 10, 10).and_hms(17, 30, 00));
 
     let user3 = pool.get_login_history_by_user("user3").await.unwrap();
     assert_eq!(user3.user_id, "user3".to_string());
-    assert_eq!(user3.epoch_login, chrono::Utc.timestamp(1630454399, 0).naive_local());
+    assert_eq!(user3.epoch_login, chrono::Local.timestamp(1630421999, 0));
     assert_eq!(
-        chrono::Local.ymd(2021, 8, 31).and_hms(23, 59, 59).naive_local(),
-        chrono::Utc.timestamp(1630454399, 0).naive_local()
+        chrono::Local.ymd(2021, 8, 31).and_hms(23, 59, 59),
+        chrono::Local.timestamp(1630421999, 0)
     );
 
     pool.set_login_history(LoginHistory{
         user_id: "user4".to_string(),
-        epoch_login: chrono::Local.ymd(2021, 12, 25).and_hms(22, 20, 00).naive_local()
+        epoch_login: chrono::Local.ymd(2021, 12, 25).and_hms(22, 20, 00)
     }).await.unwrap();
 
     pool.set_login_history(LoginHistory{
         user_id: "user1".to_string(),
-        epoch_login: chrono::Local.ymd(2021, 12, 31).and_hms(23, 59, 59).naive_local()
+        epoch_login: chrono::Local.ymd(2021, 12, 31).and_hms(23, 59, 59)
     }).await.unwrap();
 
     let user4 = pool.get_login_history_by_user("user4").await.unwrap();
     assert_eq!(user4, LoginHistory {
         user_id: "user4".to_string(),
-        epoch_login: chrono::Local.ymd(2021, 12, 25).and_hms(22, 20, 00).naive_local()
+        epoch_login: chrono::Local.ymd(2021, 12, 25).and_hms(22, 20, 00)
     });
 
     let user1 = pool.get_login_history_by_user("user1").await.unwrap();
     assert_eq!(user1, LoginHistory {
         user_id: "user1".to_string(),
-        epoch_login: chrono::Local.ymd(2021, 12, 31).and_hms(23, 59, 59).naive_local()
+        epoch_login: chrono::Local.ymd(2021, 12, 31).and_hms(23, 59, 59)
     });
 
     let err = pool.get_login_history_by_user("do not exist").await;

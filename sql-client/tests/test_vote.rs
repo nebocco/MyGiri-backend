@@ -2,7 +2,7 @@
 // Code released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 
-use sql_client::models::{ Vote, Answer, VoteResult, User };
+use sql_client::models::{ Vote, Answer, User };
 use sql_client::vote_client::VoteClient;
 use sql_client::answer_client::AnswerClient;
 use sql_client::user_client::UserClient;
@@ -51,8 +51,9 @@ async fn test_vote() {
         Answer {
             id: None,
             user_id: "user1".to_string(),
+            display_name: None,
             theme_id: 1,
-            epoch_submit: chrono::Local.ymd(2020, 10, 10).and_hms(17, 30, 0).naive_local(),
+            epoch_submit: chrono::Local.ymd(2020, 10, 10).and_hms(17, 30, 0),
             answer_text: "answer1".to_string(),
             score: 0,
             voted: false,
@@ -60,8 +61,9 @@ async fn test_vote() {
         Answer {
             id: Some(8),
             user_id: "user2".to_string(),
+            display_name: None,
             theme_id: 1,
-            epoch_submit: chrono::Local.ymd(2020, 10, 10).and_hms(18, 30, 0).naive_local(),
+            epoch_submit: chrono::Local.ymd(2020, 10, 10).and_hms(18, 30, 0),
             answer_text: "answer2".to_string(),
             score: 0,
             voted: false,
@@ -69,8 +71,9 @@ async fn test_vote() {
         Answer {
             id: None,
             user_id: "user3".to_string(),
+            display_name: None,
             theme_id: 1,
-            epoch_submit: chrono::Local.ymd(1996, 1, 1).and_hms(7, 3, 0).naive_local(),
+            epoch_submit: chrono::Local.ymd(1996, 1, 1).and_hms(7, 3, 0),
             answer_text: "answer3".to_string(),
             score: 0,
             voted: true,
@@ -81,22 +84,22 @@ async fn test_vote() {
     }
     let theme1 = pool.summarize_result(1).await.unwrap();
     assert_eq!(theme1.len(), 3);
-    assert_eq!(theme1[0], VoteResult {
+    assert_eq!(theme1[0], Answer {
         id: Some(2),
         user_id: "user2".to_string(),
         display_name: None,
         theme_id: 1,
-        epoch_submit: chrono::Local.ymd(2020, 10, 10).and_hms(18, 30, 0).naive_local(),
+        epoch_submit: chrono::Local.ymd(2020, 10, 10).and_hms(18, 30, 0),
         answer_text: "answer2".to_string(),
         score: 1000010,
         voted: false,
     });
-    assert_eq!(theme1[2], VoteResult {
+    assert_eq!(theme1[2], Answer {
         id: Some(3),
         user_id: "user3".to_string(),
         display_name: None,
         theme_id: 1,
-        epoch_submit: chrono::Local.ymd(1996, 1, 1).and_hms(7, 3, 0).naive_local(),
+        epoch_submit: chrono::Local.ymd(1996, 1, 1).and_hms(7, 3, 0),
         answer_text: "answer3".to_string(),
         score: 100000,
         voted: true,
@@ -125,32 +128,32 @@ async fn test_vote() {
     let theme1 = pool.summarize_result(1).await.unwrap();
     println!("{:?}", &theme1);
     assert_eq!(theme1.len(), 3);
-    assert_eq!(theme1[0], VoteResult {
+    assert_eq!(theme1[0], Answer {
         id: Some(3),
         user_id: "user3".to_string(),
         display_name: Some("ゆーざー".to_string()),
         theme_id: 1,
-        epoch_submit: chrono::Local.ymd(1996, 1, 1).and_hms(7, 3, 0).naive_local(),
+        epoch_submit: chrono::Local.ymd(1996, 1, 1).and_hms(7, 3, 0),
         answer_text: "answer3".to_string(),
         score: 1000100000,
         voted: true,
     });
-    assert_eq!(theme1[1], VoteResult {
+    assert_eq!(theme1[1], Answer {
         id: Some(2),
         user_id: "user2".to_string(),
         display_name: None,
         theme_id: 1,
-        epoch_submit: chrono::Local.ymd(2020, 10, 10).and_hms(18, 30, 0).naive_local(),
+        epoch_submit: chrono::Local.ymd(2020, 10, 10).and_hms(18, 30, 0),
         answer_text: "answer2".to_string(),
         score: 1000000,
         voted: false,
     });
-    assert_eq!(theme1[2], VoteResult {
+    assert_eq!(theme1[2], Answer {
         id: Some(1),
         user_id: "user1".to_string(),
         display_name: None,
         theme_id: 1,
-        epoch_submit: chrono::Local.ymd(2020, 10, 10).and_hms(17, 30, 0).naive_local(),
+        epoch_submit: chrono::Local.ymd(2020, 10, 10).and_hms(17, 30, 0),
         answer_text: "answer1".to_string(),
         score: 200000,
         voted: true,
