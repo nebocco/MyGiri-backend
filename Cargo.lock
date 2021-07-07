@@ -9,7 +9,6 @@ dependencies = [
  "actix-web",
  "async-std",
  "chrono",
- "dotenv",
  "env_logger",
  "jsonwebtoken",
  "log",
