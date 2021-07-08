@@ -31,6 +31,10 @@ pub fn config_services(cfg: &mut web::ServiceConfig) {
                         web::resource("/name")
                             .route(web::post().to(user_api::update_name))
                     )
+                    .service(
+                        web::resource("/{user_id}")
+                            .route(web::get().to(profile_api::get_profile_by_user))
+                    )
             )
             .service(
                 web::scope("/theme")

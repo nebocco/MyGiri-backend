@@ -13,6 +13,7 @@ pub mod login_history_client;
 pub mod answer_client;
 pub mod theme_client;
 pub mod vote_client;
+pub mod profile_client;
 
 pub async fn create_pool<S: AsRef<str>>(database_url: S) -> Result<PgPool> {
     let pool = PgPoolOptions::new()

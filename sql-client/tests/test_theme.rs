@@ -86,5 +86,16 @@ async fn test_theme() {
         display_name: Some("User 1".to_string()),
         epoch_open: chrono::Local.ymd(2020, 10, 10).and_hms(18, 30, 0),
         theme_text: "theme1".to_string()
-    })
+    });
+
+    let threshold = chrono::Local.ymd(2020, 10, 10).and_hms(22, 0, 0);
+    let themes = pool.get_themes_to_update(threshold).await.unwrap();
+    assert_eq!(themes.len(), 1);
+    assert_eq!(themes[0], Theme {
+        id: Some(1),
+        user_id: "user1".to_string(),
+        display_name: None,
+        epoch_open: chrono::Local.ymd(2020, 10, 10).and_hms(18, 30, 0),
+        theme_text: "theme1".to_string()
+    });
 }
