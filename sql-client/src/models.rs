@@ -98,3 +98,15 @@ pub struct Vote {
     pub answer_id: i32,
     pub score: i32,
 }
+
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
+pub struct Profile {
+    pub user_id: String,
+    pub display_name: Option<String>,
+    pub heart: i32,
+    pub star: i32,
+    pub answer: i32,
+    pub theme: i32,
+    pub self_vote: i32,
+    pub top_count: i32
+}
