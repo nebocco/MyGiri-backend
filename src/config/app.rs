@@ -14,40 +14,37 @@ pub fn config_services(cfg: &mut web::ServiceConfig) {
                 web::scope("/auth")
                     .service(
                         web::resource("/signup")
-                            .route(web::post().to(user_api::create_user))
+                        .route(web::post().to(user_api::create_user))
                     )
                     .service(
                         web::resource("/login")
-                            .route(web::post().to(user_api::login))
+                        .route(web::post().to(user_api::login))
                     )
                     .service(
                         web::resource("/logout")
-                            .route(web::post().to(user_api::logout))
+                        .route(web::post().to(user_api::logout))
                     )
             )
             .service(
                 web::scope("/user")
                     .service(
-                        web::resource("/name")
-                            .route(web::post().to(user_api::update_name))
-                    )
-                    .service(
                         web::resource("/{user_id}")
-                            .route(web::get().to(profile_api::get_profile_by_user))
+                        .route(web::get().to(profile_api::get_profile_by_user))
+                        .route(web::post().to(user_api::update_name))
                     )
             )
             .service(
                 web::scope("/theme")
                     .service(
                         web::resource("")
-                            .route(web::post().to(theme_api::post_theme))
+                        .route(web::post().to(theme_api::post_theme))
                     )
                     .service(
                         web::scope("/{theme_id}")
                             .service(
                                 web::resource("")
-                                    .route(web::get().to(theme_api::get_theme_by_id))
-                                    .route(web::post().to(answer_api::post_answer))
+                                .route(web::get().to(theme_api::get_theme_by_id))
+                                .route(web::post().to(answer_api::post_answer))
                             )
                             .service(
                                 web::scope("/vote")
@@ -70,22 +67,22 @@ pub fn config_services(cfg: &mut web::ServiceConfig) {
                 web::scope("/themes")
                     .service(
                         web::resource("/date/{date}")
-                            .route(web::get().to(theme_api::get_themes_by_date))
+                        .route(web::get().to(theme_api::get_themes_by_date))
                     )
                     .service(
                         web::resource("/user/{user_id}")
-                            .route(web::get().to(theme_api::get_themes_by_user))
+                        .route(web::get().to(theme_api::get_themes_by_user))
                     )
             )
             .service(
                 web::scope("/answers")
                     .service(
                         web::resource("/theme/{theme_id}")
-                            .route(web::get().to(answer_api::get_answers_by_theme))
+                        .route(web::get().to(answer_api::get_answers_by_theme))
                     )
                     .service(
                         web::resource("/user/{user_id}")
-                            .route(web::get().to(answer_api::get_answers_by_user))
+                        .route(web::get().to(answer_api::get_answers_by_user))
                     )
             )
     );

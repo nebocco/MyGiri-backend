@@ -3,7 +3,7 @@
 // https://opensource.org/licenses/mit-license.php
 
 use crate::{PgPool, PgRow, Row, Result};
-use crate::models::{ Profile, Answer };
+use crate::models::Profile;
 use crate::vote_client::VoteClient;
 use crate::theme_client::ThemeClient;
 use async_trait::async_trait;
@@ -71,18 +71,7 @@ impl ProfileClient for PgPool {
         let theme = self.get_theme_by_id(theme_id).await?;
         let answers = self.summarize_result(theme_id).await?;
         let (user_ids, hearts, stars, answers, themes, self_votes, top_counts) =
-        answers.into_iter().enumerate().chain(
-            std::iter::once((1, Answer {
-                id: None,
-                user_id: theme.user_id.clone(),
-                display_name: None,
-                theme_id,
-                epoch_submit: chrono::Local::now(),
-                answer_text: String::new(),
-                score: 0,
-                voted: false,
-            }))
-        )
+        answers.into_iter().enumerate()
         .fold(
             (Vec::new(), Vec::new(), Vec::new(), Vec::new(), Vec::new(), Vec::new(), Vec::new()),
             |(
@@ -97,8 +86,8 @@ impl ProfileClient for PgPool {
                 user_ids.push(answer.user_id.clone());
                 hearts.push(answer.score / 100000);
                 stars.push(answer.score % 100000);
-                answers.push(if answer.user_id != theme.user_id { 1 } else { 0 });
-                themes.push(if answer.user_id == theme.user_id { 1 } else { 0 });
+                answers.push(1);
+                themes.push(0);
                 self_votes.push(if answer.voted { 1 } else { 0 });
                 top_counts.push(if i == 0 { 1 } else { 0 });
                 (user_ids, hearts, stars, answers, themes, self_votes, top_counts)
@@ -135,6 +124,15 @@ impl ProfileClient for PgPool {
         .bind(themes)
         .bind(self_votes)
         .bind(top_counts)
+        .execute(&mut transaction)
+        .await?;
+
+        sqlx::query(
+            r"
+            UPDATE profiles SET theme = theme + 1 WHERE user_id = $1
+            "
+        )
+        .bind(theme.user_id)
         .execute(&mut transaction)
         .await?;
 
