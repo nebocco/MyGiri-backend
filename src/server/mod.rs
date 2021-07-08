@@ -15,14 +15,13 @@ pub(crate) mod theme_api;
 pub(crate) mod answer_api;
 pub(crate) mod vote_api;
 
-pub async fn run_server(pg_pool: PgPool, port: u16) -> std::io::Result<()> {
+pub async fn run_server(pg_pool: PgPool, host: &str, port: u16) -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
-            .wrap(Cors::default() // allowed_origin return access-control-allow-origin: * by default
+            .wrap(Cors::default() 
             .allowed_origin("http://127.0.0.1:8080")
             .allowed_origin("http://localhost:8080")
             .allowed_origin("https://mygiri.vercel.app")
-                .send_wildcard()
                 .allowed_methods(vec!["GET", "POST", "PUT", "DELETE"])
                 .allowed_headers(vec![http::header::AUTHORIZATION, http::header::ACCEPT])
                 .allowed_header(http::header::CONTENT_TYPE)
@@ -33,7 +32,7 @@ pub async fn run_server(pg_pool: PgPool, port: u16) -> std::io::Result<()> {
             .wrap_fn(|req, srv| { srv.call(req) })
             .configure(config::app::config_services)
     })
-    .bind(("localhost", port))?
+    .bind((host, port))?
     .run()
     .await
 }

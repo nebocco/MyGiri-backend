@@ -12,11 +12,12 @@ async fn main() {
     env_logger::init();
 
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL is not set.");
+    let host: String = env::var("HOST").unwrap_or("localhost".to_string());
     let port: u16 = env::var("PORT").expect("PORT is not set.")
         .parse::<u16>().unwrap();
     let pg_pool = create_pool(&database_url)
         .await
         .expect("Failed to initialize the connection pool");
 
-    run_server(pg_pool, port).await.expect("Failed to run server");
+    run_server(pg_pool, host.as_ref(), port).await.expect("Failed to run server");
 }
