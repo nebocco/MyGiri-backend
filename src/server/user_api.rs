@@ -44,10 +44,12 @@ pub async fn logout(req: HttpRequest, pool: web::Data<Pool>) -> Result<HttpRespo
 }
 
 pub async fn update_name(
+    req: HttpRequest,
     user: web::Json<UserNameData>,
     pool: web::Data<Pool>
 ) -> Result<HttpResponse> {
-    match auth_service::update_name(user.0, pool.get_ref()).await {
+    let authen_header = req.headers().get(constants::AUTHORIZATION).unwrap();
+    match auth_service::update_name(authen_header, user.0, pool.get_ref()).await {
         Ok(_) => Ok(HttpResponse::Ok().json(ResponseBody::new(constants::MESSAGE_UPDATE_SUCCESS, constants::EMPTY))),
         Err(err) => Ok(err.response())
     }

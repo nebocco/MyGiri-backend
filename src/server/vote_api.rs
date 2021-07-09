@@ -1,5 +1,5 @@
 use actix_web::{
-    web, HttpResponse, Result,
+    web, HttpResponse, HttpRequest, Result,
 };
 use crate::service::vote_service;
 use crate::config::db::Pool;
@@ -11,11 +11,13 @@ use crate::constants;
 
 // Post /api/theme/{id}/vote
 pub async fn post_votes(
+    req: HttpRequest,
     vote_request: web::Json<VoteRequest>,
     pool: web::Data<Pool>
 ) -> Result<HttpResponse> {
+    let authen_header = req.headers().get(constants::AUTHORIZATION).unwrap();
     let VoteRequest{ user_id, theme_id, votes } = vote_request.into_inner();
-    match vote_service::post_votes(&user_id, theme_id, votes, pool.get_ref()).await {
+    match vote_service::post_votes(authen_header, &user_id, theme_id, votes, pool.get_ref()).await {
         Ok(_) => Ok(
             HttpResponse::Ok()
             .json(ResponseBody::new(constants::MESSAGE_OK, constants::EMPTY))

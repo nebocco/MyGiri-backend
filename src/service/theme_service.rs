@@ -2,11 +2,13 @@ use crate::{
     models::{
         theme::{ Theme, ThemeDTO }
     },
+    utils::*,
     constants,
     config::db::Pool,
     errors::{ ServiceError, StatusCode }
 };
 use sql_client::theme_client::ThemeClient;
+use actix_web::http::header::HeaderValue;
 use chrono::{TimeZone, Date, Local};
 
 pub async fn get_theme_by_id(theme_id: i32, pool: &Pool) -> Result<Theme, ServiceError> {
@@ -36,7 +38,24 @@ pub async fn get_themes_by_user(user_id: &str, pool: &Pool) -> Result<Vec<Theme>
     )
 }
 
-pub async fn post_theme(theme_dto: ThemeDTO, pool: &Pool) -> Result<i32, ServiceError> {
+pub async fn post_theme(authen_header: &HeaderValue, theme_dto: ThemeDTO, pool: &Pool) -> Result<i32, ServiceError> {
+    let error = |_| ServiceError::new(
+        StatusCode::INTERNAL_SERVER_ERROR,
+        constants::MESSAGE_PROCESS_TOKEN_ERROR.to_string()
+    );
+    let authen_str = authen_header.to_str().map_err(|_| ()).map_err(error)?;
+    if !authen_str.starts_with("bearer") { return Err(error(()));}
+    let token = authen_str[6..authen_str.len()].trim();
+    let token_data = decode_token(token.to_string()).map_err(|_| ()).map_err(error)?.claims;
+    if token_data.user_id != theme_dto.user_id {
+        return Err(
+            ServiceError::new(
+                StatusCode::BAD_REQUEST,
+                constants::MESSAGE_INVALID_TOKEN.to_string()
+            )
+        )
+    }
+    
     let theme = Theme {
         id: None,
         user_id: theme_dto.user_id,

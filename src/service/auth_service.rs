@@ -22,6 +22,33 @@ use actix_web::http::header::HeaderValue;
 use uuid::Uuid;
 
 pub async fn create_user(user: UserDTO, pool: &Pool) -> Result<String, ServiceError> {
+    if user.user_id.len() == 0 || user.user_id.len() > 30 {
+        return Err(
+            ServiceError::new(
+                StatusCode::BAD_REQUEST,
+                "length of user_id should be greater than 1 and less than 30".to_string()
+            )
+        )
+    }
+
+    if user.password.len() < 8 || user.password.len() > 30 {
+        return Err(
+            ServiceError::new(
+                StatusCode::BAD_REQUEST,
+                "length of password should be greater than 8 and less than 30".to_string()
+            )
+        )
+    }
+
+    if user.display_name.as_deref().unwrap_or("this is ok").len() == 0 || user.display_name.as_deref().unwrap_or("this is ok").len() > 30 {
+        return Err(
+            ServiceError::new(
+                StatusCode::BAD_REQUEST,
+                "length of display_name should be greater than 1 and less than 30".to_string()
+            )
+        )
+    }
+    
     if pool.get_user_by_id(&user.user_id).await.is_ok() {
         return Err(ServiceError::new(
             StatusCode::BAD_REQUEST,
@@ -103,7 +130,24 @@ pub async fn is_valid_login_session(user_token: &UserToken, pool: &Pool) -> Resu
     Ok(user.login_session == user_token.login_session)
 }
 
-pub async fn update_name(user:UserNameData, pool: &Pool) -> Result<(), ServiceError> {
+pub async fn update_name(authen_header: &HeaderValue, user:UserNameData, pool: &Pool) -> Result<(), ServiceError> {
+    let error = |_| ServiceError::new(
+        StatusCode::INTERNAL_SERVER_ERROR,
+        constants::MESSAGE_PROCESS_TOKEN_ERROR.to_string()
+    );
+    let authen_str = authen_header.to_str().map_err(|_| ()).map_err(error)?;
+    if !authen_str.starts_with("bearer") { return Err(error(()));}
+    let token = authen_str[6..authen_str.len()].trim();
+    let token_data = decode_token(token.to_string()).map_err(|_| ()).map_err(error)?.claims;
+    if token_data.user_id != user.user_id {
+        return Err(
+            ServiceError::new(
+                StatusCode::BAD_REQUEST,
+                constants::MESSAGE_INVALID_TOKEN.to_string()
+            )
+        )
+    }
+    
     pool.update_user_display_name(&user.user_id, user.display_name.as_deref()).await
         .map_err(|_| ServiceError::new(
             StatusCode::INTERNAL_SERVER_ERROR,

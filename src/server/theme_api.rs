@@ -1,5 +1,5 @@
 use actix_web::{
-    web, HttpResponse, Result,
+    web, HttpResponse, HttpRequest, Result,
 };
 use crate::service::theme_service;
 use crate::config::db::Pool;
@@ -56,10 +56,12 @@ pub async fn get_themes_by_user(
 }
 
 pub async fn post_theme(
+    req: HttpRequest,
     theme_dto: web::Json<ThemeDTO>,
     pool: web::Data<Pool>
 ) -> Result<HttpResponse> {
-    match theme_service::post_theme(theme_dto.into_inner(), pool.get_ref()).await {
+    let authen_header = req.headers().get(constants::AUTHORIZATION).unwrap();
+    match theme_service::post_theme(authen_header, theme_dto.into_inner(), pool.get_ref()).await {
         Ok(_) => Ok(
             HttpResponse::Ok()
             .json(ResponseBody::new(constants::MESSAGE_OK, constants::EMPTY))

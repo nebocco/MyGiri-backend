@@ -6,11 +6,13 @@ use crate::{
     models::{
         answer::{ Answer, AnswerDTO },
     },
+    utils::*,
     constants,
     config::db::Pool,
     errors::{ ServiceError, StatusCode }
 };
 use sql_client::answer_client::AnswerClient;
+use actix_web::http::header::HeaderValue;
 
 pub async fn get_answers_by_theme(theme_id: i32, pool: &Pool) -> Result<Vec<Answer>, ServiceError> {
     log::info!("{:?}", pool.get_answers_by_theme(theme_id).await);
@@ -32,7 +34,31 @@ pub async fn get_answers_by_user(user_id: &str, pool: &Pool) -> Result<Vec<Answe
     )
 }
 
-pub async fn post_answer(answer_dto: AnswerDTO, pool: &Pool) -> Result<i32, ServiceError> {
+pub async fn post_answer(authen_header: &HeaderValue, answer_dto: AnswerDTO, pool: &Pool) -> Result<i32, ServiceError> {
+    let error = |_| ServiceError::new(
+        StatusCode::INTERNAL_SERVER_ERROR,
+        constants::MESSAGE_PROCESS_TOKEN_ERROR.to_string()
+    );
+    let authen_str = authen_header.to_str().map_err(|_| ()).map_err(error)?;
+    if !authen_str.starts_with("bearer") { return Err(error(()));}
+    let token = authen_str[6..authen_str.len()].trim();
+    let token_data = decode_token(token.to_string()).map_err(|_| ()).map_err(error)?.claims;
+    if token_data.user_id != answer_dto.user_id {
+        return Err(
+            ServiceError::new(
+                StatusCode::BAD_REQUEST,
+                constants::MESSAGE_INVALID_TOKEN.to_string()
+            )
+        )
+    }
+    if answer_dto.answer_text.len() == 0 || answer_dto.answer_text.len() > 100 {
+        return Err(
+            ServiceError::new(
+                StatusCode::BAD_REQUEST,
+                "length of answer_text should be greater than 1 and less than 100".to_string()
+            )
+        )
+    }
     let answer = Answer {
         id: None,
         user_id: answer_dto.user_id,

@@ -17,6 +17,7 @@ pub trait UserClient {
 #[async_trait]
 impl UserClient for PgPool {
     async fn signup_user(&self, user: User) -> Result<()> {
+        let mut transaction = self.begin().await?;
         sqlx::query(
             r"
             INSERT INTO users (user_id, display_name, hash, login_session)
@@ -24,12 +25,26 @@ impl UserClient for PgPool {
             ON CONFLICT DO NOTHING
             ",
         )
-        .bind(user.user_id)
+        .bind(user.user_id.clone())
         .bind(user.display_name)
         .bind(user.hash)
         .bind(user.login_session)
-        .execute(self)
+        .execute(&mut transaction)
         .await?;
+
+        sqlx::query(
+            r"
+            INSERT INTO profiles (user_id, heart, star, answer, theme, self_vote, top_count)
+            VALUES ($1, 0, 0, 0, 0, 0, 0)
+            ON CONFLICT DO NOTHING
+            ",
+        )
+        .bind(user.user_id)
+        .execute(&mut transaction)
+        .await?;
+
+        transaction.commit().await?;
+
         Ok(())
     }
 

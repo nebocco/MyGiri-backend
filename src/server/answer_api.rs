@@ -1,5 +1,5 @@
 use actix_web::{
-    web, HttpResponse, Result,
+    web, HttpResponse, HttpRequest, Result,
 };
 use crate::service::answer_service;
 use crate::config::db::Pool;
@@ -11,10 +11,12 @@ use crate::constants;
 
 // Post /api/theme/{id}/submit
 pub async fn post_answer(
+    req: HttpRequest,
     answer: web::Json<AnswerDTO>,
     pool: web::Data<Pool>
 ) -> Result<HttpResponse> {
-    match answer_service::post_answer(answer.into_inner(), pool.get_ref()).await {
+    let authen_header = req.headers().get(constants::AUTHORIZATION).unwrap();
+    match answer_service::post_answer(authen_header, answer.into_inner(), pool.get_ref()).await {
         Ok(_) => Ok(
             HttpResponse::Ok()
             .json(ResponseBody::new(constants::MESSAGE_OK, constants::EMPTY))
