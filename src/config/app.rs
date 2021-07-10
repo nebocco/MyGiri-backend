@@ -75,6 +75,13 @@ pub fn config_services(cfg: &mut web::ServiceConfig) {
                     )
             )
             .service(
+                web::scope("/answer")
+                    .service(
+                        web::resource("/{theme_id}/{user_id}")
+                        .route(web::get().to(answer_api::get_answer_by_user_and_theme))
+                    )
+            )
+            .service(
                 web::scope("/answers")
                     .service(
                         web::resource("/theme/{theme_id}")

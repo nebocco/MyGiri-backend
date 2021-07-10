@@ -34,6 +34,15 @@ pub async fn get_answers_by_user(user_id: &str, pool: &Pool) -> Result<Vec<Answe
     )
 }
 
+pub async fn get_answer_by_user_and_theme(user_id: &str, theme_id: i32, pool: &Pool) -> Result<Answer, ServiceError> {
+    pool.get_answer_by_user_and_theme(user_id, theme_id).await.map_err(|_| 
+        ServiceError::new(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            constants::MESSAGE_INTERNAL_SERVER_ERROR.to_string()
+        )
+    )
+}
+
 pub async fn post_answer(authen_header: &HeaderValue, answer_dto: AnswerDTO, pool: &Pool) -> Result<i32, ServiceError> {
     let error = |_| ServiceError::new(
         StatusCode::INTERNAL_SERVER_ERROR,

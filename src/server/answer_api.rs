@@ -52,3 +52,18 @@ pub async fn get_answers_by_theme(
         Err(err) => Ok(err.response())
     }
 }
+
+// Get /api/answer/{theme_id}/{user_id}
+pub async fn get_answer_by_user_and_theme(
+    theme_and_user: web::Path<(i32, String)>,
+    pool: web::Data<Pool>
+) -> Result<HttpResponse> {
+    let (theme_id, user_id) = theme_and_user.into_inner();
+    match answer_service::get_answer_by_user_and_theme(user_id.as_ref(), theme_id, pool.get_ref()).await {
+        Ok(themes) => Ok(
+            HttpResponse::Ok()
+            .set_header("Cache-Control", "max-age=300")
+            .json(ResponseBody::new(constants::MESSAGE_OK, themes))),
+        Err(err) => Ok(err.response())
+    }
+}
