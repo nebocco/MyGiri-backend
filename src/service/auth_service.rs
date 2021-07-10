@@ -174,6 +174,24 @@ pub async fn update_name(authen_header: &HeaderValue, user:UserNameData, pool: &
             )
         )
     }
+
+    if user.display_name.as_deref().unwrap_or("this is ok").len() == 0 {
+        return Err(
+            ServiceError::new(
+                StatusCode::BAD_REQUEST,
+                "display_name is empty".to_string()
+            )
+        )
+    }
+
+    if user.display_name.as_deref().unwrap_or("this is ok").len() > 60 {
+        return Err(
+            ServiceError::new(
+                StatusCode::BAD_REQUEST,
+                "display_name is too long".to_string()
+            )
+        )
+    }
     
     pool.update_user_display_name(&user.user_id, user.display_name.as_deref()).await
         .map_err(|_| ServiceError::new(
