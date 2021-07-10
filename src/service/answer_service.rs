@@ -51,14 +51,25 @@ pub async fn post_answer(authen_header: &HeaderValue, answer_dto: AnswerDTO, poo
             )
         )
     }
-    if answer_dto.answer_text.len() == 0 || answer_dto.answer_text.len() > 100 {
+
+    if answer_dto.answer_text.len() == 0 {
         return Err(
             ServiceError::new(
                 StatusCode::BAD_REQUEST,
-                "length of answer_text should be greater than 1 and less than 100".to_string()
+                "answer_text is empty".to_string()
             )
         )
     }
+
+    if answer_dto.answer_text.len() > 250 {
+        return Err(
+            ServiceError::new(
+                StatusCode::BAD_REQUEST,
+                "answer_text is too long".to_string()
+            )
+        )
+    }
+
     let answer = Answer {
         id: None,
         user_id: answer_dto.user_id,
@@ -69,6 +80,7 @@ pub async fn post_answer(authen_header: &HeaderValue, answer_dto: AnswerDTO, poo
         score: 0,
         voted: false
     };
+    
     pool.post_answer(answer).await.map_err(|_| 
         ServiceError::new(
             StatusCode::INTERNAL_SERVER_ERROR,

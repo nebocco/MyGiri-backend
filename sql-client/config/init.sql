@@ -1,7 +1,7 @@
 DROP TABLE IF EXISTS users;
 CREATE TABLE users (
-  user_id       VARCHAR(100) NOT NULL,
-  display_name  VARCHAR(100),
+  user_id       VARCHAR(30) NOT NULL,
+  display_name  VARCHAR(70),
   hash          VARCHAR(128) NOT NULL,
   login_session VARCHAR(128) NOT NULL,
   PRIMARY KEY (user_id)
@@ -11,7 +11,7 @@ CREATE INDEX ON users (LOWER(user_id));
 DROP TABLE IF EXISTS themes;
 CREATE TABLE themes (
   id            SERIAL NOT NULL,
-  user_id       VARCHAR(100) NOT NULL,
+  user_id       VARCHAR(30) NOT NULL,
   epoch_open    TIMESTAMPTZ NOT NULL,
   theme_text    VARCHAR(255) NOT NULL,
   updated       BOOLEAN NOT NULL DEFAULT FALSE,
@@ -23,7 +23,7 @@ CREATE INDEX ON themes (epoch_open);
 DROP TABLE IF EXISTS answers;
 CREATE TABLE answers (
   id            SERIAL,
-  user_id       VARCHAR(100) NOT NULL,
+  user_id       VARCHAR(30) NOT NULL,
   theme_id      INTEGER NOT NULL,
   epoch_submit  TIMESTAMPTZ NOT NULL,
   answer_text   VARCHAR(255) NOT NULL,
@@ -37,14 +37,14 @@ CREATE INDEX ON answers (theme_id);
 
 DROP TABLE IF EXISTS login_history;
 CREATE TABLE login_history (
-  user_id       VARCHAR(100) NOT NULL,
+  user_id       VARCHAR(30) NOT NULL,
   epoch_login   TIMESTAMPTZ NOT NULL,
   PRIMARY KEY (user_id)
 );
 
 DROP TABLE IF EXISTS votes;
 CREATE TABLE votes (
-  user_id      VARCHAR(100) NOT NULL,
+  user_id      VARCHAR(30) NOT NULL,
   theme_id     INTEGER NOT NULL,
   answer_id    INTEGER NOT NULL,
   score        INTEGER NOT NULL,
@@ -55,7 +55,7 @@ CREATE INDEX ON votes (theme_id);
 
 DROP TABLE IF EXISTS profiles;
 CREATE TABLE profiles (
-  user_id      VARCHAR(100) NOT NULL,
+  user_id      VARCHAR(30) NOT NULL,
   heart        INTEGER,
   star         INTEGER,
   answer       INTEGER,
@@ -74,12 +74,12 @@ INSERT INTO users (user_id, display_name, hash, login_session) VALUES
 ('user4', 'USER 4', '', '');
 
 INSERT INTO themes (user_id, epoch_open, theme_text) VALUES
-('user1', '2021-07-08 04:01:34.138663+09:00', 'theme1'),
-('user2', '2021-07-08 12:01:34.138663+09:00', '日本語でそれなりに長いお題 多分二行くらいにはなるかな？'),
-('user3', '2021-07-08 20:01:34.138663+09:00', '文字数の限界ああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああ'),
-('user4', '2021-07-09 04:01:34.138663+09:00', 'theme4'),
-('user5', '2021-07-09 12:01:34.138663+09:00', 'theme5'),
-('user6', '2021-07-09 20:01:34.138663+09:00', 'theme6');
+('user1', '2021-07-09 04:01:34.138663+09:00', 'theme1'),
+('user2', '2021-07-09 12:01:34.138663+09:00', '日本語でそれなりに長いお題 多分二行くらいにはなるかな？'),
+('user3', '2021-07-09 20:01:34.138663+09:00', '文字数の限界ああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああ'),
+('user4', '2021-07-10 04:01:34.138663+09:00', 'theme4'),
+('user5', '2021-07-10 12:01:34.138663+09:00', 'theme5'),
+('user6', '2021-07-10 20:01:34.138663+09:00', 'theme6');
 
 INSERT INTO answers (user_id, theme_id, epoch_submit, answer_text, score, voted) VALUES
 ('user1', 1, '2021-07-06 15:01:34.138663+09:00', 'user1_answer', 0, FALSE),

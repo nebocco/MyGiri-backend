@@ -22,29 +22,56 @@ use actix_web::http::header::HeaderValue;
 use uuid::Uuid;
 
 pub async fn create_user(user: UserDTO, pool: &Pool) -> Result<String, ServiceError> {
-    if user.user_id.len() == 0 || user.user_id.len() > 30 {
+    if user.user_id.len() == 0 {
         return Err(
             ServiceError::new(
                 StatusCode::BAD_REQUEST,
-                "length of user_id should be greater than 1 and less than 30".to_string()
+                "user_id is empty".to_string()
             )
         )
     }
 
-    if user.password.len() < 8 || user.password.len() > 30 {
+    if user.user_id.len() > 30 {
         return Err(
             ServiceError::new(
                 StatusCode::BAD_REQUEST,
-                "length of password should be greater than 8 and less than 30".to_string()
+                "user_id is too long".to_string()
             )
         )
     }
 
-    if user.display_name.as_deref().unwrap_or("this is ok").len() == 0 || user.display_name.as_deref().unwrap_or("this is ok").len() > 30 {
+    if user.password.len() < 8 {
         return Err(
             ServiceError::new(
                 StatusCode::BAD_REQUEST,
-                "length of display_name should be greater than 1 and less than 30".to_string()
+                "password is too short".to_string()
+            )
+        )
+    }
+
+    if user.password.len() > 30 {
+        return Err(
+            ServiceError::new(
+                StatusCode::BAD_REQUEST,
+                "password is too long".to_string()
+            )
+        )
+    }
+
+    if user.display_name.as_deref().unwrap_or("this is ok").len() == 0 {
+        return Err(
+            ServiceError::new(
+                StatusCode::BAD_REQUEST,
+                "display_name is empty".to_string()
+            )
+        )
+    }
+
+    if user.display_name.as_deref().unwrap_or("this is ok").len() > 60 {
+        return Err(
+            ServiceError::new(
+                StatusCode::BAD_REQUEST,
+                "display_name is too long".to_string()
             )
         )
     }

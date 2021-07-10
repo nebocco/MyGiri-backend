@@ -55,6 +55,24 @@ pub async fn post_theme(authen_header: &HeaderValue, theme_dto: ThemeDTO, pool: 
             )
         )
     }
+
+    if theme_dto.theme_text.len() == 0 {
+        return Err(
+            ServiceError::new(
+                StatusCode::BAD_REQUEST,
+                "theme_text is empty".to_string()
+            )
+        )
+    }
+
+    if theme_dto.theme_text.len() > 250 {
+        return Err(
+            ServiceError::new(
+                StatusCode::BAD_REQUEST,
+                "theme_text is too long".to_string()
+            )
+        )
+    }
     
     let theme = Theme {
         id: None,
