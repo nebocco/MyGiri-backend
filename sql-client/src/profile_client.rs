@@ -7,16 +7,17 @@ use crate::models::Profile;
 use crate::vote_client::VoteClient;
 use crate::theme_client::ThemeClient;
 use async_trait::async_trait;
+use anyhow::anyhow;
 
 #[async_trait]
 pub trait ProfileClient {
-    async fn get_profile_by_user(&self, user_id: &str) -> Result<Profile>;
+    async fn get_profile_by_user(&self, user_id: &str) -> Option<Profile>;
     async fn update_profile(&self, theme_id: i32) -> Result<()>;
 }
 
 #[async_trait]
 impl ProfileClient for PgPool {
-    async fn get_profile_by_user(&self, user_id: &str) -> Result<Profile> {
+    async fn get_profile_by_user(&self, user_id: &str) -> Option<Profile> {
         let profile = sqlx::query(
             r"
             SELECT
@@ -62,13 +63,14 @@ impl ProfileClient for PgPool {
             })
         })
         .fetch_one(self)
-        .await?;
+        .await
+        .ok()?;
 
-        Ok(profile)
+        Some(profile)
     }
     
     async fn update_profile(&self, theme_id: i32) -> Result<()> {
-        let theme = self.get_theme_by_id(theme_id).await?;
+        let theme = self.get_theme_by_id(theme_id).await.ok_or(anyhow!("theme not found".to_string()))?;
         let answers = self.summarize_result(theme_id).await?;
         let (user_ids, hearts, stars, answers, themes, self_votes, top_counts) =
         answers.into_iter().enumerate()

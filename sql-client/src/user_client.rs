@@ -11,7 +11,7 @@ pub trait UserClient {
     async fn signup_user(&self, user: User) -> Result<()>;
     async fn update_user_display_name(&self, user_id: &str, display_name: Option<&str>) -> Result<()>;
     async fn update_user_login_session(&self, user_id: &str, login_session: &str) -> Result<()>;
-    async fn get_user_by_id(&self, user_id: &str) -> Result<User>;
+    async fn get_user_by_id(&self, user_id: &str) -> Option<User>;
 }
 
 #[async_trait]
@@ -66,7 +66,7 @@ impl UserClient for PgPool {
         Ok(())
     }
 
-    async fn get_user_by_id(&self, user_id: &str) -> Result<User> {
+    async fn get_user_by_id(&self, user_id: &str) -> Option<User> {
         let res = sqlx::query(
             r"
             SELECT user_id, display_name, hash, login_session
@@ -88,7 +88,8 @@ impl UserClient for PgPool {
             })
         })
         .fetch_one(self)
-        .await?;
-        Ok(res)
+        .await
+        .ok()?;
+        Some(res)
     }
 }

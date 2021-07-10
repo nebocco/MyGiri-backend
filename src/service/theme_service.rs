@@ -12,10 +12,10 @@ use actix_web::http::header::HeaderValue;
 use chrono::{TimeZone, Date, Local};
 
 pub async fn get_theme_by_id(theme_id: i32, pool: &Pool) -> Result<Theme, ServiceError> {
-    pool.get_theme_by_id(theme_id).await.map_err(|_| 
+    pool.get_theme_by_id(theme_id).await.ok_or( 
         ServiceError::new(
-            StatusCode::INTERNAL_SERVER_ERROR,
-            constants::MESSAGE_INTERNAL_SERVER_ERROR.to_string()
+            StatusCode::NOT_FOUND,
+            constants::EMPTY.to_string()
         )
     )
 }

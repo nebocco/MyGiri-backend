@@ -9,7 +9,7 @@ use chrono::{Date, DateTime, Local, Duration};
 
 #[async_trait]
 pub trait ThemeClient {
-    async fn get_theme_by_id(&self, theme_id: i32) -> Result<Theme>;
+    async fn get_theme_by_id(&self, theme_id: i32) -> Option<Theme>;
     async fn get_themes_by_user(&self, user_id: &str) -> Result<Vec<Theme>>;
     async fn get_themes_by_date(&self, date: Date<Local>) -> Result<Vec<Theme>>;
     async fn get_themes_to_update(&self, threshold: DateTime<Local>) -> Result<Vec<Theme>>;
@@ -18,7 +18,7 @@ pub trait ThemeClient {
 
 #[async_trait]
 impl ThemeClient for PgPool {
-    async fn get_theme_by_id(&self, theme_id: i32) -> Result<Theme> {
+    async fn get_theme_by_id(&self, theme_id: i32) -> Option<Theme> {
         let theme = sqlx::query(
             r"
             SELECT 
@@ -54,8 +54,9 @@ impl ThemeClient for PgPool {
             })
         })
         .fetch_one(self)
-        .await?;
-        Ok(theme)
+        .await
+        .ok()?;
+        Some(theme)
     }
 
     async fn get_themes_by_user(&self, user_id: &str) -> Result<Vec<Theme>> {

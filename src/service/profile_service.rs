@@ -11,10 +11,10 @@ use crate::{
 use sql_client::profile_client::ProfileClient;
 
 pub async fn get_profile_by_user(user_id: &str, pool: &Pool) -> Result<Profile, ServiceError> {
-    pool.get_profile_by_user(user_id).await.map_err(|_| 
+    pool.get_profile_by_user(user_id).await.ok_or( 
         ServiceError::new(
-            StatusCode::INTERNAL_SERVER_ERROR,
-            constants::MESSAGE_INTERNAL_SERVER_ERROR.to_string()
+            StatusCode::NOT_FOUND,
+            constants::EMPTY.to_string()
         )
     )
 }

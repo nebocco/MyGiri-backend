@@ -76,7 +76,7 @@ pub async fn create_user(user: UserDTO, pool: &Pool) -> Result<String, ServiceEr
         )
     }
     
-    if pool.get_user_by_id(&user.user_id).await.is_ok() {
+    if pool.get_user_by_id(&user.user_id).await.is_some() {
         return Err(ServiceError::new(
             StatusCode::BAD_REQUEST,
             format!("User '{}' is already registered", &user.user_id)
@@ -96,7 +96,7 @@ pub async fn create_user(user: UserDTO, pool: &Pool) -> Result<String, ServiceEr
 
 pub async fn login_user(login: UserDTO, pool: &Pool) -> Result<TokenBodyResponse, ServiceError> {
     let user = pool.get_user_by_id(&login.user_id).await
-        .map_err(|_|
+        .ok_or(
             ServiceError::new(
                 StatusCode::UNAUTHORIZED,
                 constants::MESSAGE_USER_NOT_FOUND.to_string()
@@ -153,7 +153,7 @@ pub async fn logout_user(authen_header: &HeaderValue, pool: &Pool) -> Result<(),
 
 pub async fn is_valid_login_session(user_token: &UserToken, pool: &Pool) -> Result<bool, String> {
     let user = pool.get_user_by_id(&user_token.user_id).await
-        .map_err(|_| constants::MESSAGE_DB_CONNECTION_ERROR.to_string())?;
+        .ok_or(constants::MESSAGE_DB_CONNECTION_ERROR.to_string())?;
     Ok(user.login_session == user_token.login_session)
 }
 
@@ -204,7 +204,7 @@ pub async fn update_name(authen_header: &HeaderValue, user:UserNameData, pool: &
 
 pub async fn create_login_history(user_id: &str, pool: &Pool) -> Result<LoginHistory, ServiceError> {
     let user = pool.get_user_by_id(user_id).await
-    .map_err(|_| ServiceError::new(
+    .ok_or(ServiceError::new(
         StatusCode::UNAUTHORIZED,
         constants::MESSAGE_USER_NOT_FOUND.to_string()
     ))?;

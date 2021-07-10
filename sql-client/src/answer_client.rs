@@ -10,7 +10,7 @@ use async_trait::async_trait;
 pub trait AnswerClient {
     async fn get_answers_by_user(&self, user_id: &str) -> Result<Vec<Answer>>;
     async fn get_answers_by_theme(&self, theme_id: i32) -> Result<Vec<Answer>>;
-    async fn get_answer_by_user_and_theme(&self, user_id: &str, theme_id: i32) -> Result<Answer>;
+    async fn get_answer_by_user_and_theme(&self, user_id: &str, theme_id: i32) -> Option<Answer>;
     async fn post_answer(&self, answer: Answer) -> Result<i32>;
 }
 
@@ -116,7 +116,7 @@ impl AnswerClient for PgPool {
         Ok(answers)
     }
 
-    async fn get_answer_by_user_and_theme(&self, user_id: &str, theme_id: i32) -> Result<Answer> {
+    async fn get_answer_by_user_and_theme(&self, user_id: &str, theme_id: i32) -> Option<Answer> {
         let answer = sqlx::query(
             r"
             SELECT
@@ -163,8 +163,9 @@ impl AnswerClient for PgPool {
             })
         })
         .fetch_one(self)
-        .await?;
-        Ok(answer)
+        .await
+        .ok()?;
+        Some(answer)
     }
 
     async fn post_answer(&self, answer: Answer) -> Result<i32> {
