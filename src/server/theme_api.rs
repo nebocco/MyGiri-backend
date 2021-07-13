@@ -69,3 +69,31 @@ pub async fn post_theme(
         Err(err) => Ok(err.response())
     }
 }
+
+
+// Get /api/themes/recent/{user_id}
+pub async fn get_recent_activity(
+    user_id: web::Path<String>,
+    pool: web::Data<Pool>
+) -> Result<HttpResponse> {
+    match theme_service::get_recent_activity(user_id.into_inner().as_ref(), pool.get_ref()).await {
+        Ok(themes) => Ok(
+            HttpResponse::Ok()
+            .set_header("Cache-Control", "max-age=300")
+            .json(ResponseBody::new(constants::MESSAGE_OK, themes))),
+        Err(err) => Ok(err.response())
+    }
+}
+
+// Get /api/themes/active
+pub async fn get_themes_active(
+    pool: web::Data<Pool>
+) -> Result<HttpResponse> {
+    match theme_service::get_themes_active(pool.get_ref()).await {
+        Ok(themes) => Ok(
+            HttpResponse::Ok()
+            .set_header("Cache-Control", "max-age=300")
+            .json(ResponseBody::new(constants::MESSAGE_OK, themes))),
+        Err(err) => Ok(err.response())
+    }
+}

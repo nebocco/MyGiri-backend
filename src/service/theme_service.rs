@@ -12,7 +12,7 @@ use actix_web::http::header::HeaderValue;
 use chrono::{TimeZone, Date, Local};
 
 pub async fn get_theme_by_id(theme_id: i32, pool: &Pool) -> Result<Theme, ServiceError> {
-    pool.get_theme_by_id(theme_id).await.ok_or( 
+    pool.get_theme_by_id(theme_id).await.ok_or(
         ServiceError::new(
             StatusCode::NOT_FOUND,
             constants::EMPTY.to_string()
@@ -21,7 +21,7 @@ pub async fn get_theme_by_id(theme_id: i32, pool: &Pool) -> Result<Theme, Servic
 }
 
 pub async fn get_themes_by_date(date: Date<Local>, pool: &Pool) -> Result<Vec<Theme>, ServiceError> {
-    pool.get_themes_by_date(date).await.map_err(|_| 
+    pool.get_themes_by_date(date).await.map_err(|_|
         ServiceError::new(
             StatusCode::INTERNAL_SERVER_ERROR,
             constants::MESSAGE_INTERNAL_SERVER_ERROR.to_string()
@@ -30,13 +30,33 @@ pub async fn get_themes_by_date(date: Date<Local>, pool: &Pool) -> Result<Vec<Th
 }
 
 pub async fn get_themes_by_user(user_id: &str, pool: &Pool) -> Result<Vec<Theme>, ServiceError> {
-    pool.get_themes_by_user(user_id).await.map_err(|_| 
+    pool.get_themes_by_user(user_id).await.map_err(|_|
         ServiceError::new(
             StatusCode::INTERNAL_SERVER_ERROR,
             constants::MESSAGE_INTERNAL_SERVER_ERROR.to_string()
         )
     )
 }
+
+pub async fn get_recent_activity(user_id: &str, pool: &Pool) -> Result<Vec<Theme>, ServiceError> {
+    pool.get_recent_activity(user_id).await.map_err(|_|
+        ServiceError::new(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            constants::MESSAGE_INTERNAL_SERVER_ERROR.to_string()
+        )
+    )
+}
+
+pub async fn get_themes_active(pool: &Pool) -> Result<Vec<Theme>, ServiceError> {
+    let now = chrono::Local::now();
+    pool.get_themes_active(now).await.map_err(|_|
+        ServiceError::new(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            constants::MESSAGE_INTERNAL_SERVER_ERROR.to_string()
+        )
+    )
+}
+
 
 pub async fn post_theme(authen_header: &HeaderValue, theme_dto: ThemeDTO, pool: &Pool) -> Result<i32, ServiceError> {
     let error = |_| ServiceError::new(
@@ -73,7 +93,7 @@ pub async fn post_theme(authen_header: &HeaderValue, theme_dto: ThemeDTO, pool: 
             )
         )
     }
-    
+
     let theme = Theme {
         id: None,
         user_id: theme_dto.user_id,
@@ -81,8 +101,8 @@ pub async fn post_theme(authen_header: &HeaderValue, theme_dto: ThemeDTO, pool: 
         theme_text: theme_dto.theme_text,
         epoch_open: chrono::Local.ymd(2999, 12, 31).and_hms(0, 0, 0)
     };
-    
-    pool.post_theme(theme).await.map_err(|_| 
+
+    pool.post_theme(theme).await.map_err(|_|
         ServiceError::new(
             StatusCode::INTERNAL_SERVER_ERROR,
             constants::MESSAGE_INTERNAL_SERVER_ERROR.to_string()

@@ -50,7 +50,7 @@ pub fn config_services(cfg: &mut web::ServiceConfig) {
                                 web::scope("/vote")
                                     .service(
                                         web::resource("")
-                                        .route(web::post().to(vote_api::post_votes))   
+                                        .route(web::post().to(vote_api::post_votes))
                                     )
                                     .service(
                                         web::resource("/{user_id}")
@@ -72,6 +72,14 @@ pub fn config_services(cfg: &mut web::ServiceConfig) {
                     .service(
                         web::resource("/user/{user_id}")
                         .route(web::get().to(theme_api::get_themes_by_user))
+                    )
+                    .service(
+                        web::resource("recent/{user_id}")
+                        .route(web::get().to(theme_api::get_recent_activity))
+                    )
+                    .service(
+                        web::resource("active")
+                        .route(web::get().to(theme_api::get_themes_active))
                     )
             )
             .service(
