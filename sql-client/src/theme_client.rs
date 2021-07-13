@@ -164,6 +164,7 @@ impl ThemeClient for PgPool {
             ) u
             ON t.user_id = u.user_id
             WHERE t.updated = 'FALSE' AND t.epoch_open < $1
+            ORDER BY t.epoch_open ASC
             ",
         )
         .bind(now)
