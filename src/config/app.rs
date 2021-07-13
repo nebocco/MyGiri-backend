@@ -74,11 +74,11 @@ pub fn config_services(cfg: &mut web::ServiceConfig) {
                         .route(web::get().to(theme_api::get_themes_by_user))
                     )
                     .service(
-                        web::resource("recent/{user_id}")
+                        web::resource("/recent/{user_id}")
                         .route(web::get().to(theme_api::get_recent_activity))
                     )
                     .service(
-                        web::resource("active")
+                        web::resource("/active")
                         .route(web::get().to(theme_api::get_themes_active))
                     )
             )
