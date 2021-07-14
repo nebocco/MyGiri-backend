@@ -58,7 +58,7 @@ pub async fn create_user(user: UserDTO, pool: &Pool) -> Result<String, ServiceEr
         )
     }
 
-    if user.display_name.as_deref().unwrap_or("this is ok").len() == 0 {
+    if user.display_name.as_deref().unwrap_or("this is ok").chars().count() == 0 {
         return Err(
             ServiceError::new(
                 StatusCode::BAD_REQUEST,
@@ -67,7 +67,7 @@ pub async fn create_user(user: UserDTO, pool: &Pool) -> Result<String, ServiceEr
         )
     }
 
-    if user.display_name.as_deref().unwrap_or("this is ok").len() > 60 {
+    if user.display_name.as_deref().unwrap_or("this is ok").chars().count() > 30 {
         return Err(
             ServiceError::new(
                 StatusCode::BAD_REQUEST,
@@ -184,7 +184,7 @@ pub async fn update_name(authen_header: &HeaderValue, user:UserNameData, pool: &
         )
     }
 
-    if user.display_name.as_deref().unwrap_or("this is ok").len() > 60 {
+    if user.display_name.as_deref().unwrap_or("this is ok").chars().count() > 30 {
         return Err(
             ServiceError::new(
                 StatusCode::BAD_REQUEST,

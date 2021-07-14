@@ -73,7 +73,7 @@ pub async fn post_answer(authen_header: &HeaderValue, answer_dto: AnswerDTO, poo
         )
     }
 
-    if answer_dto.answer_text.len() > 250 {
+    if answer_dto.answer_text.chars().count() > 100 {
         return Err(
             ServiceError::new(
                 StatusCode::BAD_REQUEST,
