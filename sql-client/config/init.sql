@@ -1,7 +1,7 @@
 DROP TABLE IF EXISTS users;
 CREATE TABLE users (
   user_id       VARCHAR(30) NOT NULL,
-  display_name  VARCHAR(70),
+  display_name  VARCHAR(40),
   hash          VARCHAR(128) NOT NULL,
   login_session VARCHAR(128) NOT NULL,
   PRIMARY KEY (user_id)
@@ -13,7 +13,7 @@ CREATE TABLE themes (
   id            SERIAL NOT NULL,
   user_id       VARCHAR(30) NOT NULL,
   epoch_open    TIMESTAMPTZ NOT NULL,
-  theme_text    VARCHAR(255) NOT NULL,
+  theme_text    VARCHAR(128) NOT NULL,
   updated       BOOLEAN NOT NULL DEFAULT FALSE,
   PRIMARY KEY (id)
 );
@@ -26,7 +26,7 @@ CREATE TABLE answers (
   user_id       VARCHAR(30) NOT NULL,
   theme_id      INTEGER NOT NULL,
   epoch_submit  TIMESTAMPTZ NOT NULL,
-  answer_text   VARCHAR(255) NOT NULL,
+  answer_text   VARCHAR(128) NOT NULL,
   score         INTEGER NOT NULL,
   voted         BOOLEAN NOT NULL,
   PRIMARY KEY (user_id, theme_id)
@@ -74,15 +74,15 @@ INSERT INTO users (user_id, display_name, hash, login_session) VALUES
 ('$user4', 'USER 4', '', '');
 
 INSERT INTO themes (user_id, epoch_open, theme_text) VALUES
-('admin', '2021-07-11 04:00:00.000000+09:00', 'theme1'),
-('admin', '2021-07-11 12:00:00.000000+09:00', 'theme2'),
-('admin', '2021-07-11 20:00:00.000000+09:00', 'theme3'),
-('admin', '2021-07-12 04:00:00.000000+09:00', '日本一安い旅館、どんなの？'),
-('admin', '2021-07-12 12:00:00.000000+09:00', '「この忍者、センスないな」どうしてそう思った？'),
-('admin', '2021-07-12 20:00:00.000000+09:00', 'ランチ5000円のサイゼリヤ、普通と何が違う？'),
-('admin', '2021-07-13 04:00:00.000000+09:00', '「あ、このお坊さん偽物だな」なぜ分かった？'),
-('admin', '2021-07-13 12:00:00.000000+09:00', '引っ越しの達人の特徴を教えてください'),
-('admin', '2021-07-13 20:00:00.000000+09:00', '卒業式のしおりに書かれていた驚きのプログラムとは？');
+('admin', '2021-07-13 04:00:00.000000+09:00', 'theme1'),
+('admin', '2021-07-13 12:00:00.000000+09:00', 'theme2'),
+('admin', '2021-07-13 20:00:00.000000+09:00', 'theme3'),
+('admin', '2021-07-14 04:00:00.000000+09:00', '日本一安い旅館、どんなの？'),
+('admin', '2021-07-14 12:00:00.000000+09:00', '「この忍者、センスないな」どうしてそう思った？'),
+('admin', '2021-07-14 20:00:00.000000+09:00', 'ランチ5000円のサイゼリヤ、普通と何が違う？'),
+('admin', '2021-07-15 04:00:00.000000+09:00', '「あ、このお坊さん偽物だな」なぜ分かった？'),
+('admin', '2021-07-15 12:00:00.000000+09:00', '引っ越しの達人の特徴を教えてください'),
+('admin', '2021-07-15 20:00:00.000000+09:00', '卒業式のしおりに書かれていた驚きのプログラムとは？');
 
 INSERT INTO answers (user_id, theme_id, epoch_submit, answer_text, score, voted) VALUES
 ('$user1', 4, '2021-07-09 15:01:34.138663+09:00', 'user1_answer', 0, FALSE),
