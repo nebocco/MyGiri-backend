@@ -58,11 +58,15 @@ where
         let headers = req.headers_mut();
         headers.append(HeaderName::from_static("content-length"), HeaderValue::from_static("true"));
 
-        let mut authenticate_pass = Method::OPTIONS == *req.method() ||
+        let mut authenticate: Result<String, String> = if Method::OPTIONS == *req.method() ||
         constants::IGNORE_ROUTES.iter().any(|ignore_route|
             req.path().starts_with(ignore_route)
-        );
-        if !authenticate_pass {
+        ) {
+            Ok("ok".to_string())
+        } else {
+            Err(constants::MESSAGE_INVALID_TOKEN.to_string())
+        };
+        if authenticate.is_err() {
             log::info!("Need Authentication");
             if let Some(pool) = req.app_data::<Data<Pool>>() {
                 log::info!("Connecting to database...");
@@ -74,9 +78,9 @@ where
                             let token = authen_str[6..authen_str.len()].trim();
                             if let Ok(token_data) = utils::decode_token(token.to_string()) {
                                 log::info!("Decoding token...");
-                                if task::block_on(utils::verify_token(&token_data, pool)).is_ok() {
+                                authenticate = task::block_on(utils::verify_token(&token_data, pool));
+                                if authenticate.is_ok() {
                                     log::info!("Valid token");
-                                    authenticate_pass = true;
                                 } else {
                                     log::error!("Invalid token");
                                 }
@@ -86,7 +90,7 @@ where
                 }
             }
         }
-        if authenticate_pass {
+        if authenticate.is_ok() {
             let fut = self.service.call(req);
             Box::pin(async move {
                 let res = fut.await?;
@@ -95,9 +99,9 @@ where
         } else {
             Box::pin(async move {
                 Ok(req.into_response(
-                HttpResponse::Unauthorized()
+                    HttpResponse::Unauthorized()
                     .json(ResponseBody::new(
-                        constants::MESSAGE_INVALID_TOKEN,
+                        authenticate.unwrap_err().as_ref(),
                         constants::EMPTY,
                     ))
                     .into_body(),

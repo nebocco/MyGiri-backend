@@ -15,6 +15,7 @@ pub const MESSAGE_LOGIN_FAILED: &str = "Wrong username or password, please try a
 pub const MESSAGE_USER_NOT_FOUND: &str = "User not found, please signup";
 pub const MESSAGE_LOGOUT_SUCCESS: &str = "Logout successfully";
 pub const MESSAGE_PROCESS_TOKEN_ERROR: &str = "Error while processing token";
+pub const MESSAGE_EXPIRED_TOKEN: &str = "Token has expired, please login again";
 pub const MESSAGE_INVALID_TOKEN: &str = "Invalid token, please login again";
 pub const MESSAGE_INTERNAL_SERVER_ERROR: &str = "Internal Server Error";
 pub const MESSAGE_DB_CONNECTION_ERROR: &str = "Error while handling database";

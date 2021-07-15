@@ -85,7 +85,7 @@ pub async fn post_theme(authen_header: &HeaderValue, theme_dto: ThemeDTO, pool: 
         )
     }
 
-    if theme_dto.theme_text.len() > 250 {
+    if theme_dto.theme_text.chars().count() > 100 {
         return Err(
             ServiceError::new(
                 StatusCode::BAD_REQUEST,
