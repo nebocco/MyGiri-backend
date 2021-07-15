@@ -41,9 +41,8 @@ pub fn decode_token(token: String) -> jsonwebtoken::errors::Result<TokenData<Use
 }
 
 pub async fn verify_token(token_data: &TokenData<UserToken>, pool: &Pool) -> Result<String, String> {
-    if is_valid_login_session(&token_data.claims, pool).await? {
-        Ok(token_data.claims.user_id.to_string())
-    } else {
-        Err("Invalid token".to_string())
+    match is_valid_login_session(&token_data.claims, pool).await {
+        Ok(()) => Ok(token_data.claims.user_id.to_string()),
+        Err(message) => Err(message)
     }
 }

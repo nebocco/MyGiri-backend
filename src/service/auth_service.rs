@@ -151,10 +151,18 @@ pub async fn logout_user(authen_header: &HeaderValue, pool: &Pool) -> Result<(),
     Ok(())
 }
 
-pub async fn is_valid_login_session(user_token: &UserToken, pool: &Pool) -> Result<bool, String> {
+pub async fn is_valid_login_session(user_token: &UserToken, pool: &Pool) -> Result<(), String> {
+    let now = chrono::Local::now().timestamp();
+    if user_token.exp < now {
+        return Err(constants::MESSAGE_EXPIRED_TOKEN.to_string());
+    }
     let user = pool.get_user_by_id(&user_token.user_id).await
         .ok_or(constants::MESSAGE_DB_CONNECTION_ERROR.to_string())?;
-    Ok(user.login_session == user_token.login_session)
+    if user.login_session == user_token.login_session {
+        Ok(())
+    } else {
+        Err(constants::MESSAGE_INVALID_TOKEN.to_string())
+    }
 }
 
 pub async fn update_name(authen_header: &HeaderValue, user:UserNameData, pool: &Pool) -> Result<(), ServiceError> {
