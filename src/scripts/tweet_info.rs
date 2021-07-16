@@ -1,8 +1,10 @@
-use anyhow::Result;
 use crate::{
     config::db::Pool,
     models::theme::Theme
 };
+
+use surf::{ Response, Error, http::Method };
+type Result<T> = std::result::Result<T, Error>; 
 
 use std::collections::BTreeMap;
 
@@ -11,8 +13,8 @@ pub async fn tweet_info(pool: &Pool) {
     if let Some(theme) = theme {
         let client = Client::from_env().expect("Failed to load env values.");
         let text = generate_text(theme);
-        let response = client.tweet(&text).await.expect("Failed to tweet.");
-        let res_text = response.text().await.expect("Failed to read response.");
+        let mut response = client.tweet(&text).await.expect("Failed to tweet.");
+        let res_text = response.body_string().await.expect("Failed to read response.");
         log::info!("{}", res_text);
     }
 }
@@ -38,55 +40,42 @@ impl Client {
         })
     }
 
-    async fn tweet(&self, status: &str) -> Result<reqwest::Response, reqwest::Error> {
+    async fn tweet(&self, status: &str) -> Result<Response> {
         let mut parameters = BTreeMap::new();
         parameters.insert("status", status);
         self.request(
-            reqwest::Method::POST,
+            Method::Post,
             "https://api.twitter.com/1.1/statuses/update.json",
             &parameters,
-        )
-        .await
+        ).await
     }
 
     async fn request(
         &self,
-        method: reqwest::Method,
+        method: Method,
         url: &str,
         parameters: &BTreeMap<&str, &str>,
-    ) -> Result<reqwest::Response, reqwest::Error> {
-        let header_map = {
-            use reqwest::header::*;
-            let mut map = HeaderMap::new();
-            map.insert(
-                AUTHORIZATION,
-                self.authorization(&method, url, parameters)
-                    .parse()
-                    .unwrap(),
-            );
-            map.insert(
-                CONTENT_TYPE,
-                HeaderValue::from_static("application/x-www-form-urlencoded"),
-            );
-            map
-        };
-        let url_with_parameters = format!(
+    ) -> Result<Response> {
+        let url_with_parameters = surf::Url::parse(format!(
             "{}?{}",
             url,
             equal_collect(parameters.iter().map(|(key, value)| { (*key, *value) })).join("&")
-        );
+        ).as_ref())?;
 
-        let client = reqwest::Client::new();
-        client
-            .request(method, &url_with_parameters)
-            .headers(header_map)
-            .send()
-            .await
+        let request = surf::Request::builder(method, url_with_parameters)
+            .header(
+                "Authorization",
+                self.authorization(&method, url, parameters)
+            )
+            .content_type("application/x-www-form-urlencoded")
+            .build();
+
+        surf::client().send(request).await
     }
 
     fn authorization(
         &self,
-        method: &reqwest::Method,
+        method: &Method,
         url: &str,
         parameters: &BTreeMap<&str, &str>,
     ) -> String {
@@ -121,7 +110,7 @@ impl Client {
 
     fn signature<'a>(
         &self,
-        method: &reqwest::Method,
+        method: &Method,
         url: &str,
         mut parameters: BTreeMap<&'a str, &'a str>,
         other_parameters: &Vec<(&'a str, &'a str)>,
