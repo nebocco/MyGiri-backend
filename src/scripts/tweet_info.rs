@@ -1,22 +1,12 @@
 use anyhow::Result;
-use sql_client::create_pool;
-use actix_backend::{
+use crate::{
     config::db::Pool,
     models::theme::Theme
 };
 
 use std::collections::BTreeMap;
 
-#[async_std::main]
-async fn main() {
-    std::env::set_var("RUST_LOG", "actix_web=debug");
-    env_logger::init();
-
-    let database_url = std::env::var("DATABASE_URL")
-        .expect("DATABASE_URL is not set.");
-    let pool = create_pool(&database_url).await
-        .expect("Failed to initialize the connection pool");
-
+pub async fn tweet_info(pool: &Pool) {
     let theme = get_new_theme(&pool).await.expect("Failed to load theme.");
     if let Some(theme) = theme {
         let client = Client::from_env().expect("Failed to load env values.");

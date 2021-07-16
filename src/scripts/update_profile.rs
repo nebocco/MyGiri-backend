@@ -1,17 +1,11 @@
 use sql_client::{
-    create_pool,
     theme_client::ThemeClient,
     profile_client::ProfileClient
 };
-use std::{env, thread, time};
+use crate::config::db::Pool;
+use std::{ thread, time };
 
-#[async_std::main]
-async fn main() {
-    env::set_var("RUST_LOG", "actix_web=debug");
-    env_logger::init();
-
-    let url = std::env::var("DATABASE_URL").expect("DATABASE_URL is not set.");
-    let pool = create_pool(url).await.unwrap();
+pub async fn update_profile(pool: &Pool) {
     let threshold = chrono::Local::now() - chrono::Duration::hours(32);
     let themes = pool.get_themes_to_update(threshold).await.unwrap();
 
