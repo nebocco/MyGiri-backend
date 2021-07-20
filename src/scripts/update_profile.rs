@@ -11,9 +11,10 @@ pub async fn update_profile(pool: &Pool) {
 
     log::info!("Start updating");
     for theme in themes {
-        log::info!("Updating theme {}", theme.id.unwrap());
-        match pool.update_profile(theme.id.unwrap()).await {
-            Ok(_) => { log::info!("Updated theme {} successfully", theme.id.unwrap()) },
+        let theme_id = theme.id.unwrap();
+        log::info!("Updating theme {}", theme_id);
+        match pool.update_profile(theme).await {
+            Ok(_) => { log::info!("Updated theme {} successfully", theme_id); },
             Err(_) => { log::info!("Error occured"); break }
         }
         sleep_1sec();

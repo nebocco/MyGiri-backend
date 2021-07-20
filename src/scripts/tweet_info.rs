@@ -171,7 +171,7 @@ fn generate_text(theme: Theme) -> String {
     let deadline = theme.epoch_open + chrono::Duration::hours(24);
     let theme_url = format!("https://mygiri.vercel.app/theme/{}", theme.id.unwrap());
     let text = format!(
-        "お題が公開されました\n『{}』\n\n回答締め切りは{}です🍵\n{}",
+        "お題が公開されました！\n『{}』\n\n回答締め切りは{}です🍵\n{}",
         theme_text, deadline.format("%-m月%-d日 %-H時"), theme_url
     );
     text

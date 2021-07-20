@@ -3,16 +3,14 @@
 // https://opensource.org/licenses/mit-license.php
 
 use crate::{PgPool, PgRow, Row, Result};
-use crate::models::Profile;
+use crate::models::{ Theme, Profile };
 use crate::vote_client::VoteClient;
-use crate::theme_client::ThemeClient;
 use async_trait::async_trait;
-use anyhow::anyhow;
 
 #[async_trait]
 pub trait ProfileClient {
     async fn get_profile_by_user(&self, user_id: &str) -> Option<Profile>;
-    async fn update_profile(&self, theme_id: i32) -> Result<()>;
+    async fn update_profile(&self, theme: Theme) -> Result<()>;
 }
 
 #[async_trait]
@@ -69,9 +67,8 @@ impl ProfileClient for PgPool {
         Some(profile)
     }
     
-    async fn update_profile(&self, theme_id: i32) -> Result<()> {
-        let theme = self.get_theme_by_id(theme_id).await.ok_or(anyhow!("theme not found".to_string()))?;
-        let answers = self.summarize_result(theme_id).await?;
+    async fn update_profile(&self, theme: Theme) -> Result<()> {
+        let answers = self.summarize_result(theme.id.unwrap()).await?;
         let (user_ids, hearts, stars, answers, themes, self_votes, top_counts) =
         answers.into_iter().enumerate()
         .fold(
