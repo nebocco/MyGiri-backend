@@ -28,7 +28,7 @@ pub async fn run_server(pg_pool: PgPool, host: &str, port: u16) -> std::io::Resu
                 .allowed_header(http::header::CONTENT_TYPE)
                 .max_age(3600))
             .data(pg_pool.clone())
-            .wrap(actix_web::middleware::Logger::default())
+            // .wrap(actix_web::middleware::Logger::default())
             .wrap(crate::middleware::Authentication)
             .wrap_fn(|req, srv| { srv.call(req) })
             .configure(config::app::config_services)
