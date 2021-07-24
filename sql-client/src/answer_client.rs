@@ -3,12 +3,13 @@
 // https://opensource.org/licenses/mit-license.php
 
 use crate::{PgPool, PgRow, Row, Result};
-use crate::models::Answer;
+use crate::models::{ Answer, Theme };
 use async_trait::async_trait;
 
 #[async_trait]
 pub trait AnswerClient {
     async fn get_answers_by_user(&self, user_id: &str) -> Result<Vec<Answer>>;
+    async fn get_answers_with_themes_by_user(&self, user_id: &str) -> Result<Vec<(Answer, Theme)>>;
     async fn get_answers_by_theme(&self, theme_id: i32) -> Result<Vec<Answer>>;
     async fn get_answer_by_user_and_theme(&self, user_id: &str, theme_id: i32) -> Option<Answer>;
     async fn post_answer(&self, answer: Answer) -> Result<i32>;
@@ -60,6 +61,84 @@ impl AnswerClient for PgPool {
                 score: score as i64,
                 voted
             })
+        })
+        .fetch_all(self)
+        .await?;
+        Ok(answers)
+    }
+
+    // order by score desc, limit 10
+    async fn get_answers_with_themes_by_user(&self, user_id: &str) -> Result<Vec<(Answer, Theme)>> {
+        let answers = sqlx::query(
+            r"
+            SELECT
+                a.id,
+                a.user_id,
+                u.display_name,
+                a.theme_id,
+                a.epoch_submit,
+                a.answer_text,
+                a.score,
+                a.voted,
+                t.user_id AS theme_user_id,
+                t.theme_text,
+                t.epoch_open
+            FROM answers AS a
+            LEFT JOIN (
+                SELECT
+                    user_id,
+                    display_name
+                FROM users
+            ) u
+            ON a.user_id = u.user_id
+            LEFT JOIN (
+                SELECT
+                    id,
+                    user_id,
+                    theme_text,
+                    epoch_open,
+                    updated
+                FROM themes
+            ) t
+            ON a.theme_id = t.id
+            WHERE LOWER(a.user_id) = LOWER($1)
+            AND t.updated = TRUE
+            ORDER BY score DESC, epoch_open ASC
+            LIMIT 10
+            ",
+        )
+        .bind(user_id)
+        .try_map(|row: PgRow| {
+            let id = row.try_get("id")?;
+            let user_id = row.try_get("user_id")?;
+            let display_name = row.try_get("display_name")?;
+            let theme_id = row.try_get("theme_id")?;
+            let epoch_submit = row.try_get("epoch_submit")?;
+            let answer_text = row.try_get("answer_text")?;
+            let score: i32 = row.try_get("score")?;
+            let voted = row.try_get("voted")?;
+            let theme_user_id = row.try_get("theme_user_id")?;
+            let theme_text = row.try_get("theme_text")?;
+            let epoch_open = row.try_get("epoch_open")?;
+
+            let answer = Answer{
+                id,
+                user_id,
+                display_name,
+                theme_id,
+                epoch_submit,
+                answer_text,
+                score: score as i64,
+                voted
+            };
+            let theme = Theme {
+                id: Some(theme_id),
+                user_id: theme_user_id,
+                display_name: None,
+                theme_text,
+                epoch_open
+            };
+            Ok((answer, theme))
         })
         .fetch_all(self)
         .await?;

@@ -97,7 +97,7 @@ pub fn config_services(cfg: &mut web::ServiceConfig) {
                     )
                     .service(
                         web::resource("/user/{user_id}")
-                        .route(web::get().to(answer_api::get_answers_by_user))
+                        .route(web::get().to(answer_api::get_answers_with_themes_by_user))
                     )
             )
     );

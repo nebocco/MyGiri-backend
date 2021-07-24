@@ -25,7 +25,7 @@ pub async fn post_answer(
     }
 }
 
-// Get /api/answers/user/{user_id}
+#[allow(dead_code)]
 pub async fn get_answers_by_user(
     user_id: web::Path<String>,
     pool: web::Data<Pool>
@@ -35,6 +35,20 @@ pub async fn get_answers_by_user(
             HttpResponse::Ok()
             .set_header("Cache-Control", "max-age=300")
             .json(ResponseBody::new(constants::MESSAGE_OK, themes))),
+        Err(err) => Ok(err.response())
+    }
+}
+
+// Get /api/answers/user/{user_id}
+pub async fn get_answers_with_themes_by_user(
+    user_id: web::Path<String>,
+    pool: web::Data<Pool>
+) -> Result<HttpResponse> {
+    match answer_service::get_answers_with_themes_by_user(user_id.into_inner().as_ref(), pool.get_ref()).await {
+        Ok(result) => Ok(
+            HttpResponse::Ok()
+            .set_header("Cache-Control", "max-age=300")
+            .json(ResponseBody::new(constants::MESSAGE_OK, result))),
         Err(err) => Ok(err.response())
     }
 }

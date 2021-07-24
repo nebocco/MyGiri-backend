@@ -2,7 +2,8 @@
 // Code released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 
-use sql_client::models::Profile;
+use sql_client::models::{ Answer, Profile };
+use sql_client::answer_client::AnswerClient;
 use sql_client::profile_client::ProfileClient;
 use sql_client::theme_client::ThemeClient;
 mod utils;
@@ -46,9 +47,9 @@ async fn test_profile() {
 
     sqlx::query(
         r"
-        INSERT INTO answers(user_id, theme_id, epoch_submit, answer_text, score, voted) VALUES
-        ('user2', 1, '2021-07-06 15:01:34.138663+09:00', 'user2_answer', 0, FALSE),
-        ('user3', 1, '2021-07-06 15:01:34.138663+09:00', 'user3_answer', 0, TRUE)
+        INSERT INTO answers (user_id, theme_id, epoch_submit, answer_text, score, voted) VALUES
+        ('user2', 1, '2021-07-06 15:01:34+09:00', 'user2_answer', 0, FALSE),
+        ('user3', 1, '2021-07-06 15:01:34+09:00', 'user3_answer', 0, TRUE)
         "
     )
     .execute(&pool).await.unwrap();
@@ -72,7 +73,12 @@ async fn test_profile() {
     )
     .execute(&pool).await.unwrap();
 
-    pool.update_profile(1).await.unwrap();
+    let themes = pool.get_themes_to_update(chrono::Local.ymd(2021, 7, 10).and_hms(10, 12, 0)).await.unwrap();
+    assert_eq!(themes.len(), 1);
+    assert_eq!(themes[0].id, Some(1));
+    let theme = themes.into_iter().next().unwrap();
+
+    pool.update_profile(theme).await.unwrap();
     let user1 = pool.get_profile_by_user("user1").await.unwrap();
     assert_eq!(user1, Profile {
         user_id: "user1".to_string(),
@@ -109,6 +115,29 @@ async fn test_profile() {
         top_count: 101
     });
 
+    let answer1 = pool.get_answer_by_user_and_theme("user2", 1).await.unwrap();
+    assert_eq!(answer1, Answer{
+        id: Some(1),
+        user_id: "user2".to_string(),
+        display_name: Some("USER 2".to_string()),
+        theme_id: 1,
+        epoch_submit: chrono::Local.ymd(2021, 7, 6).and_hms(15, 1, 34),
+        answer_text: "user2_answer".to_string(),
+        score: 100001,
+        voted: false,
+    });
+
+    let answer2 = pool.get_answer_by_user_and_theme("user3", 1).await.unwrap();
+    assert_eq!(answer2, Answer{
+        id: Some(2),
+        user_id: "user3".to_string(),
+        display_name: Some("USER 3".to_string()),
+        theme_id: 1,
+        epoch_submit: chrono::Local.ymd(2021, 7, 6).and_hms(15, 1, 34),
+        answer_text: "user3_answer".to_string(),
+        score: 200001,
+        voted: true,
+    });
     let themes = pool.get_themes_to_update(chrono::Local.ymd(2021, 7, 10).and_hms(10, 12, 0)).await.unwrap();
     assert_eq!(themes, Vec::new());
 }

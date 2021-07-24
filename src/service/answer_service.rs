@@ -5,6 +5,7 @@
 use crate::{
     models::{
         answer::{ Answer, AnswerDTO },
+        theme::Theme
     },
     utils::*,
     constants,
@@ -27,6 +28,15 @@ pub async fn get_answers_by_theme(theme_id: i32, pool: &Pool) -> Result<Vec<Answ
 
 pub async fn get_answers_by_user(user_id: &str, pool: &Pool) -> Result<Vec<Answer>, ServiceError> {
     pool.get_answers_by_user(user_id).await.map_err(|_| 
+        ServiceError::new(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            constants::MESSAGE_INTERNAL_SERVER_ERROR.to_string()
+        )
+    )
+}
+
+pub async fn get_answers_with_themes_by_user(user_id: &str, pool: &Pool) -> Result<Vec<(Answer, Theme)>, ServiceError> {
+    pool.get_answers_with_themes_by_user(user_id).await.map_err(|_| 
         ServiceError::new(
             StatusCode::INTERNAL_SERVER_ERROR,
             constants::MESSAGE_INTERNAL_SERVER_ERROR.to_string()

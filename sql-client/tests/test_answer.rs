@@ -2,9 +2,10 @@
 // Code released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 
-use sql_client::models::{ User, Answer };
+use sql_client::models::{ User, Answer, Theme };
 use sql_client::answer_client::AnswerClient;
 use sql_client::user_client::UserClient;
+use sql_client::theme_client::ThemeClient;
 use chrono::TimeZone;
 mod utils;
 
@@ -44,7 +45,6 @@ async fn test_answer() {
             voted: true,
         },
     ];
-
 
     // post answer
     for (i, answer) in answers.into_iter().enumerate() {
@@ -105,6 +105,64 @@ async fn test_answer() {
     });
 
     let user2_theme2 = pool.get_answer_by_user_and_theme("user2", 2).await;
-    assert!(user2_theme2.is_err());
+    assert_eq!(user2_theme2, None);
 
+    // get answers with themes
+    let themes = vec![
+        Theme {
+            id: None,
+            user_id: "user1".to_string(),
+            display_name: None,
+            epoch_open: chrono::Local.ymd(2020, 10, 10).and_hms(18, 30, 0),
+            theme_text: "theme1".to_string()
+        },
+        Theme {
+            id: Some(8),
+            user_id: "user1".to_string(),
+            display_name: None,
+            epoch_open: chrono::Local.ymd(2020, 10, 10).and_hms(23, 30, 0),
+            theme_text: "theme2".to_string()
+        },
+        Theme {
+            id: None,
+            user_id: "user2".to_string(),
+            display_name: None,
+            epoch_open: chrono::Local.ymd(2021, 1, 13).and_hms(1, 17, 5),
+            theme_text: "theme3".to_string()
+        },
+    ];
+
+    // post theme
+    for (i, theme) in themes.into_iter().enumerate() {
+        let id = pool.post_theme(theme).await.unwrap();
+        assert_eq!((i + 1) as i32, id);
+    }
+
+    sqlx::query(
+        r"UPDATE themes SET updated = TRUE"
+    ).execute(&pool)
+    .await
+    .unwrap();
+
+    let user1 = pool.get_answers_with_themes_by_user("user1").await.unwrap();
+    assert_eq!(user1.len(), 2);
+    assert_eq!(user1[0], (
+        Answer {
+            id: Some(1),
+            user_id: "user1".to_string(),
+            display_name: Some("User 1".to_string()),
+            theme_id: 1,
+            epoch_submit: chrono::Local.ymd(2020, 10, 10).and_hms(17, 30, 0),
+            answer_text: "answer1".to_string(),
+            score: 78,
+            voted: false,
+        },
+        Theme {
+            id: Some(1),
+            user_id: "user1".to_string(),
+            display_name: None,
+            epoch_open: chrono::Local.ymd(2020, 10, 10).and_hms(18, 30, 0),
+            theme_text: "theme1".to_string()
+        }
+    ));
 }

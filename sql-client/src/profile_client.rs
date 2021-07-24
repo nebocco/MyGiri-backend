@@ -69,11 +69,14 @@ impl ProfileClient for PgPool {
     
     async fn update_profile(&self, theme: Theme) -> Result<()> {
         let answers = self.summarize_result(theme.id.unwrap()).await?;
-        let (user_ids, hearts, stars, answers, themes, self_votes, top_counts) =
+        let (answer_ids, scores, self_votes_bool, user_ids, hearts, stars, answers, themes, self_votes, top_counts) =
         answers.into_iter().enumerate()
         .fold(
-            (Vec::new(), Vec::new(), Vec::new(), Vec::new(), Vec::new(), Vec::new(), Vec::new()),
+            (Vec::new(), Vec::new(), Vec::new(), Vec::new(), Vec::new(), Vec::new(), Vec::new(), Vec::new(), Vec::new(), Vec::new()),
             |(
+                mut answer_ids,
+                mut scores,
+                mut self_votes_bool,
                 mut user_ids,
                 mut hearts,
                 mut stars,
@@ -82,6 +85,9 @@ impl ProfileClient for PgPool {
                 mut self_votes,
                 mut top_counts
             ), (i, answer)| {
+                answer_ids.push(answer.id.unwrap());
+                scores.push(answer.score - if answer.voted { 100000 } else { 0 });
+                self_votes_bool.push(answer.voted);
                 user_ids.push(answer.user_id.clone());
                 hearts.push(answer.score / 100000);
                 stars.push(answer.score % 100000);
@@ -89,11 +95,31 @@ impl ProfileClient for PgPool {
                 themes.push(0);
                 self_votes.push(if answer.voted { 1 } else { 0 });
                 top_counts.push(if i == 0 { 1 } else { 0 });
-                (user_ids, hearts, stars, answers, themes, self_votes, top_counts)
+                (answer_ids, scores, self_votes_bool, user_ids, hearts, stars, answers, themes, self_votes, top_counts)
             }
         );
 
         let mut transaction = self.begin().await?;
+
+        sqlx::query(
+            r"
+            UPDATE answers SET
+                score = new_data.score,
+                voted = new_data.voted
+            FROM ( SELECT
+                UNNEST($1::INTEGER[]) as id,
+                UNNEST($2::INTEGER[]) as score,
+                UNNEST($3::BOOLEAN[]) as voted
+            ) as new_data
+            WHERE answers.id = new_data.id 
+            "
+        )
+        .bind(answer_ids)
+        .bind(scores)
+        .bind(self_votes_bool)
+        .execute(&mut transaction)
+        .await?;
+
         sqlx::query(
             r"
             INSERT INTO profiles AS p (user_id, heart, star, answer,
