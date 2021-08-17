@@ -100,7 +100,7 @@ impl VoteClient for PgPool {
         })
         .fetch_all(self)
         .await?;
-        answers.sort_by_key(|a| (-a.score, a.epoch_submit));
+        answers.sort_by_key(|a| (-a.score, a.voted, a.epoch_submit));
         Ok(answers)
     }
 
