@@ -22,7 +22,7 @@ CREATE INDEX ON themes (epoch_open);
 
 DROP TABLE IF EXISTS answers;
 CREATE TABLE answers (
-  id            SERIAL,
+  id            SERIAL UNIQUE,
   user_id       VARCHAR(30) NOT NULL,
   theme_id      INTEGER NOT NULL,
   epoch_submit  TIMESTAMPTZ NOT NULL,
