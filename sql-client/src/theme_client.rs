@@ -202,7 +202,7 @@ impl ThemeClient for PgPool {
             INNER JOIN answers a
             ON a.user_id = $1 AND t.id = a.theme_id
             WHERE t.updated = TRUE
-            ORDER BY a.epoch_submit DESC
+            ORDER BY t.epoch_open DESC
             LIMIT 5
             ",
         )
