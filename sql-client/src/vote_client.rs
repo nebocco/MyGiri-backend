@@ -57,8 +57,7 @@ impl VoteClient for PgPool {
                 a.epoch_submit,
                 a.answer_text,
                 a.voted,
-                a.score,
-                COALESCE(v.score, 0) AS vote_score
+                COALESCE(v.score, 0) AS score
             FROM answers AS a                
             LEFT JOIN (
                 SELECT
@@ -87,7 +86,6 @@ impl VoteClient for PgPool {
             let epoch_submit = row.try_get("epoch_submit")?;
             let answer_text = row.try_get("answer_text")?;
             let score: i64 = row.try_get("score")?;
-            let vote_score: i64 = row.try_get("vote_score")?;
             let voted = row.try_get("voted")?;
             Ok(Answer {
                 id: Some(id),
@@ -96,7 +94,7 @@ impl VoteClient for PgPool {
                 theme_id,
                 epoch_submit,
                 answer_text,
-                score: score.max(vote_score) + if voted { 100_000 } else { 0 },
+                score: score + if voted { 100_000 } else { 0 },
                 voted
             })
         })
