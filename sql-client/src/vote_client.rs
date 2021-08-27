@@ -57,12 +57,13 @@ impl VoteClient for PgPool {
                 a.epoch_submit,
                 a.answer_text,
                 a.voted,
-                COALESCE(v.score, 0) AS score
+                a.score,
+                COALESCE(v.vote_score, 0) AS vote_score
             FROM answers AS a                
             LEFT JOIN (
                 SELECT
                 answer_id,
-                SUM(score) AS score
+                SUM(score) AS vote_score
                 FROM votes
                 GROUP BY answer_id
             ) v
@@ -85,7 +86,9 @@ impl VoteClient for PgPool {
             let theme_id = row.try_get("theme_id")?;
             let epoch_submit = row.try_get("epoch_submit")?;
             let answer_text = row.try_get("answer_text")?;
-            let score: i64 = row.try_get("score")?;
+            let answer_score: i32 = row.try_get("score")?;
+            let vote_score: i64 = row.try_get("vote_score")?;
+            let score: i64 = std::cmp::max(answer_score as i64, vote_score);
             let voted = row.try_get("voted")?;
             Ok(Answer {
                 id: Some(id),
@@ -94,7 +97,7 @@ impl VoteClient for PgPool {
                 theme_id,
                 epoch_submit,
                 answer_text,
-                score: score + if voted { 100_000 } else { 0 },
+                score: score as i64 + if voted { 100_000 } else { 0 },
                 voted
             })
         })
