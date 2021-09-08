@@ -74,26 +74,26 @@ INSERT INTO users (user_id, display_name, hash, login_session) VALUES
 ('$user4', 'USER 4', '', '');
 
 INSERT INTO themes (user_id, epoch_open, theme_text) VALUES
-('admin', '2021-07-13 04:00:00.000000+09:00', 'theme1'),
-('admin', '2021-07-13 12:00:00.000000+09:00', 'theme2'),
-('admin', '2021-07-13 20:00:00.000000+09:00', 'theme3'),
-('admin', '2021-07-14 04:00:00.000000+09:00', '日本一安い旅館、どんなの？'),
-('admin', '2021-07-14 12:00:00.000000+09:00', '「この忍者、センスないな」どうしてそう思った？'),
-('admin', '2021-07-14 20:00:00.000000+09:00', 'ランチ5000円のサイゼリヤ、普通と何が違う？'),
-('admin', '2021-07-15 04:00:00.000000+09:00', '「あ、このお坊さん偽物だな」なぜ分かった？'),
-('admin', '2021-07-15 12:00:00.000000+09:00', '引っ越しの達人の特徴を教えてください'),
-('admin', '2021-07-15 20:00:00.000000+09:00', '卒業式のしおりに書かれていた驚きのプログラムとは？');
+('admin', CURRENT_TIMESTAMP - interval '2 days 16 hours', 'theme1'),
+('admin', CURRENT_TIMESTAMP - interval '2 days  8 hours', 'theme2'),
+('admin', CURRENT_TIMESTAMP - interval '2 days  0 hours', 'theme3'),
+('admin', CURRENT_TIMESTAMP - interval '1 days 16 hours', '日本一安い旅館、どんなの？'),
+('admin', CURRENT_TIMESTAMP - interval '1 days  8 hours', '「この忍者、センスないな」どうしてそう思った？'),
+('admin', CURRENT_TIMESTAMP - interval '1 days  0 hours', 'ランチ5000円のサイゼリヤ、普通と何が違う？'),
+('admin', CURRENT_TIMESTAMP - interval '0 days 16 hours', '「あ、このお坊さん偽物だな」なぜ分かった？'),
+('admin', CURRENT_TIMESTAMP - interval '0 days  8 hours', '引っ越しの達人の特徴を教えてください'),
+('admin', CURRENT_TIMESTAMP - interval '0 days  0 hours', '卒業式のしおりに書かれていた驚きのプログラムとは？');
 
 INSERT INTO answers (user_id, theme_id, epoch_submit, answer_text, score, voted) VALUES
-('$user1', 4, '2021-07-09 15:01:34.138663+09:00', 'user1_answer', 0, FALSE),
-('$user2', 4, '2021-07-09 15:01:34.138663+09:00', 'user2_answer', 0, FALSE),
-('$user3', 4, '2021-07-09 15:01:34.138663+09:00', 'user3_answer', 0, TRUE),
-('$user1', 5, '2021-07-09 15:01:34.138663+09:00', 'user1_answer', 0, FALSE),
-('$user2', 5, '2021-07-09 15:02:34.138663+09:00', 'user2_answer', 0, FALSE),
-('$user3', 5, '2021-07-09 15:03:34.138663+09:00', 'user3_answer', 0, FALSE),
-('$user1', 6, '2021-07-09 15:01:34.138663+09:00', 'user1_answer', 0, FALSE),
-('$user2', 6, '2021-07-09 15:02:34.138663+09:00', 'user2_answer', 0, FALSE),
-('$user3', 6, '2021-07-09 15:03:34.138663+09:00', 'user3_answer', 0, FALSE);
+('$user1', 4, CURRENT_TIMESTAMP, 'user1_answer', 0, FALSE),
+('$user2', 4, CURRENT_TIMESTAMP, 'user2_answer', 0, FALSE),
+('$user3', 4, CURRENT_TIMESTAMP, 'user3_answer', 0, TRUE),
+('$user1', 5, CURRENT_TIMESTAMP, 'user1_answer', 0, FALSE),
+('$user2', 5, CURRENT_TIMESTAMP, 'user2_answer', 0, FALSE),
+('$user3', 5, CURRENT_TIMESTAMP, 'user3_answer', 0, FALSE),
+('$user1', 6, CURRENT_TIMESTAMP, 'user1_answer', 0, FALSE),
+('$user2', 6, CURRENT_TIMESTAMP, 'user2_answer', 0, FALSE),
+('$user3', 6, CURRENT_TIMESTAMP, 'user3_answer', 0, FALSE);
 
 INSERT INTO votes (user_id, theme_id, answer_id, score) VALUES
 ('$user3', 4, 1, 100000),
