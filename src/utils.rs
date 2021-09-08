@@ -3,10 +3,12 @@
 // https://opensource.org/licenses/mit-license.php
 
 use once_cell::sync::Lazy;
+use actix_web::http::Method;
 use argon2::{self, Config};
 use crate::models::login::{UserToken, ENCODE_KEY};
 use crate::config::db::Pool;
 use crate::service::auth_service::is_valid_login_session;
+use crate::constants;
 use jsonwebtoken::{TokenData, DecodingKey, Validation};
 
 pub static SECRET_KEY: Lazy<String> = Lazy::new(||
@@ -44,5 +46,46 @@ pub async fn verify_token(token_data: &TokenData<UserToken>, pool: &Pool) -> Res
     match is_valid_login_session(&token_data.claims, pool).await {
         Ok(()) => Ok(token_data.claims.user_id.to_string()),
         Err(message) => Err(message)
+    }
+}
+
+pub fn is_ignorable(path: &str, method: &Method) -> bool {
+    // ignorable request
+    *method == Method::OPTIONS ||
+    // ignorable routes
+    constants::IGNORE_ROUTES.iter().any(|ignore_route|
+        path.starts_with(ignore_route)
+    ) ||
+    // theme itself or theme result
+    *method == Method::GET
+    && path.starts_with("/api/theme/")
+    && !path.contains("vote")
+}
+
+#[cfg(test)]
+mod test {
+    #[test]
+    fn test_is_ignorable() {
+        use super::is_ignorable;
+        use actix_web::http::Method;
+
+        assert!(is_ignorable("/api/theme", &Method::OPTIONS));
+
+        assert!(is_ignorable("/api/auth/login", &Method::POST));
+        assert!(is_ignorable("/api/auth/signup", &Method::POST));
+        assert!(is_ignorable("/api/themes/active", &Method::GET));
+        assert!(is_ignorable("/api/themes/date", &Method::GET));
+
+        assert!(is_ignorable("/api/theme/100", &Method::GET));
+        assert!(is_ignorable("/api/theme/100/result", &Method::GET));
+        
+
+        assert!(!is_ignorable("/api/theme", &Method::POST));
+        assert!(!is_ignorable("/api/theme/100", &Method::POST));
+        assert!(!is_ignorable("/api/theme/100/vote", &Method::POST));
+        assert!(!is_ignorable("/api/theme/100/vote/user1", &Method::GET));
+
+        assert!(!is_ignorable("/api/themes/user/user1", &Method::GET));
+        assert!(!is_ignorable("/api/themes/recent/user1", &Method::GET));
     }
 }

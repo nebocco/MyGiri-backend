@@ -6,7 +6,7 @@ use crate::{config::db::Pool, constants, models::response::ResponseBody, utils};
 use actix_web::{
     Error, HttpResponse,
     dev::{Service, Transform, ServiceRequest, ServiceResponse},
-    http::{Method, HeaderName, HeaderValue},
+    http::{HeaderName, HeaderValue},
     web::Data,
 };
 use async_std::task;
@@ -58,14 +58,12 @@ where
         let headers = req.headers_mut();
         headers.append(HeaderName::from_static("content-length"), HeaderValue::from_static("true"));
 
-        let mut authenticate: Result<String, String> = if Method::OPTIONS == *req.method() ||
-        constants::IGNORE_ROUTES.iter().any(|ignore_route|
-            req.path().starts_with(ignore_route)
-        ) {
-            Ok("ok".to_string())
-        } else {
-            Err(constants::MESSAGE_INVALID_TOKEN.to_string())
-        };
+        let mut authenticate: Result<String, String> =
+            if utils::is_ignorable(req.path(), req.method()) {
+                Ok("ok".to_string())
+            } else {
+                Err(constants::MESSAGE_INVALID_TOKEN.to_string())
+            };
         if authenticate.is_err() {
             log::info!("Need Authentication");
             if let Some(pool) = req.app_data::<Data<Pool>>() {
